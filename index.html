@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>異世界サモンTCG Ver.3.0</title>
+<style>
+  body{font-family:sans-serif;background:#0e101a;color:#fff;margin:0;padding:8px;display:flex;flex-direction:column;align-items:center;user-select:none}
+  .top-header{width:100%;max-width:820px;background:#181b2c;border:2px solid #4a4e69;border-radius:10px;padding:8px 12px;margin-bottom:8px;box-sizing:border-box;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+  .game-title{font-size:15px;font-weight:bold;color:#ffd700}
+  .wallet-info{display:flex;gap:12px;font-size:13px;font-weight:bold}
+  .coin-text{color:#f1c40f}
+  .cap-text{color:#7bed9f}
+  .nav-tabs{display:flex;width:100%;max-width:820px;gap:4px;margin-bottom:8px}
+  .tab-btn{flex:1;background:#252940;color:#ccc;border:1px solid #4a4e69;padding:8px 2px;border-radius:8px;font-weight:bold;font-size:11px;cursor:pointer}
+  .tab-btn.active{background:linear-gradient(180deg,#ff9f43,#ee5253);color:#fff;border-color:#ffd700}
+  .screen{display:none;width:100%;max-width:820px}
+  .screen.active{display:block}
+  .panel-box{background:#202336;border:2px solid #4a4e69;border-radius:12px;padding:10px;box-sizing:border-box}
+  .status-bar{display:flex;justify-content:space-between;align-items:center;background:#141622;padding:6px 12px;border-radius:8px;margin-bottom:6px;font-weight:bold;font-size:12px}
+  .life{font-size:16px;color:#ff6b6b}
+  .dungeon-zone{text-align:center;background:#2f2644;border:1px dashed #a29bfe;padding:5px;border-radius:8px;margin-bottom:6px;font-size:11px}
+  .field-row{display:flex;justify-content:center;gap:8px;min-height:175px;margin:5px 0;padding:6px;background:rgba(0,0,0,0.3);border-radius:8px}
+  .hand-row,.card-grid{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;min-height:165px;margin-top:6px;padding:8px;background:#181a29;border-radius:8px}
+  .card{width:110px;height:168px;background:#2f334d;border:2px solid #888;border-radius:8px;padding:4px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;position:relative;overflow:hidden;font-size:9.5px}
+  .card.selected{border-color:#ffd700!important;box-shadow:0 0 14px #ffd700!important;transform:translateY(-6px)}
+  .card.exhausted{opacity:0.65}
+  .attr-fire{background:linear-gradient(160deg,#5c1919,#241010)}
+  .attr-grass{background:linear-gradient(160deg,#174d2c,#0e2116)}
+  .attr-thunder{background:linear-gradient(160deg,#594910,#241e0b)}
+  .attr-water{background:linear-gradient(160deg,#143d5e,#0d1c29)}
+  .attr-light{background:linear-gradient(160deg,#615e48,#29271e)}
+  .attr-dark{background:linear-gradient(160deg,#451b59,#1b0d24)}
+  .attr-none{background:linear-gradient(160deg,#384959,#1b2229)}
+  .rarity-N{border:2px solid #7f8c8d}
+  .rarity-R{border:2px solid #bdc3c7;box-shadow:0 0 6px rgba(236,240,241,0.4)}
+  .rarity-SR{border:2px solid #f1c40f;box-shadow:0 0 10px rgba(241,196,15,0.7)}
+  .rarity-
