@@ -773,23 +773,50 @@ setInterval(replaceAttrEmojis, 300);
       console.log("オンライン対戦画面へ移行");
     }
 
-    function startCpuBattle() {
+        function startCpuBattle() {
       console.log("CPU戦を開始");
-      // 今まで動いていたCPU戦の処理（ゲーム開始関数など）をここに繋ぐ！
     }
-    // ▲▲▲ 追加ここまで ▲▲▲
 
-  </script> <!-- ←元々の最後のscriptタグ -->
-</body>
-</html>
+    // ▼ 画面タッチでタイトル画面を消してホーム画面へ移行する関数
+    function startGameFromTitle() {
+      const titleScreen = document.getElementById('screen-title');
+      if (titleScreen) {
+        titleScreen.style.display = 'none';
+        titleScreen.classList.remove('active');
+      }
+      if (typeof switchTab === 'function') {
+        switchTab('home');
+      }
+    }
 
-</script>
+    // ▼ 7つのタブを切り替える関数
+    function switchTab(tabName) {
+      const screens = ['home', 'dungeon', 'battle', 'deck', 'pack', 'market', 'collection'];
+      
+      screens.forEach(s => {
+        const screenEl = document.getElementById('screen-' + s);
+        if (screenEl) screenEl.style.display = 'none';
+        
+        const tabEl = document.getElementById('tab-' + s);
+        if (tabEl) tabEl.classList.remove('active');
+      });
+
+      const targetScreen = document.getElementById('screen-' + tabName);
+      if (targetScreen) targetScreen.style.display = 'block';
+
+      const targetTab = document.getElementById('tab-' + tabName);
+      if (targetTab) targetTab.classList.add('active');
+    }
+  </script>
+
   <!-- カード長押し拡大モーダル -->
-<div id="card-zoom-modal" onclick="closeCardZoom()">
-  <div class="zoom-content" onclick="event.stopPropagation()">
-    <div id="zoom-card-render"></div>
-    <p class="zoom-hint">画面タップで閉じる</p>
+  <div id="card-zoom-modal" onclick="closeCardZoom()">
+    <div class="zoom-content" onclick="event.stopPropagation()">
+      <div id="zoom-card-render"></div>
+      <p class="zoom-hint">画面タップで閉じる</p>
+    </div>
   </div>
-</div>
+
 </body>
 </html>
+
