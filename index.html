@@ -91,32 +91,40 @@
     <div class="panel-box" style="text-align: center; background: #262336;">
       <h3 style="color: #ffd700; margin-top: 0; margin-bottom: 15px;">⚔️ バトルモード選択</h3>
       <div style="display: flex; flex-direction: column; gap: 10px; max-width: 300px; margin: 0 auto;">
-        <button onclick="startCpuBattle()" style="padding: 12px; font-weight: bold; background: #4caf50; color: #fff; border: none; border-radius: 8px; cursor: pointer;">🤖 CPU対戦（ソロ戦）</button>
+        <button onclick="startCpuBattle()" style="padding: 12px; font-weight: bold; background: #4caf50; color: #fff; border: none; border-radius: 8px; cursor: pointer;">🤖 CPU戦を開始する</button>
         <button onclick="createPvPRoom()" style="padding: 12px; font-weight: bold; background: #2196f3; color: #fff; border: none; border-radius: 8px; cursor: pointer;">🏠 PvP対戦（部屋を作る）</button>
         <div style="background: #1a1824; padding: 10px; border-radius: 8px; border: 1px solid #444;">
           <p style="margin: 0 0 8px 0; font-size: 13px; color: #ccc;">PvPコード入力（対戦に参加）</p>
           <input type="text" id="pvp-code-input" placeholder="4桁の合言葉" style="padding: 8px; width: 60%; text-align: center; border-radius: 4px; border: 1px solid #666; background: #111; color: #fff; font-size: 14px;">
-          <button onclick="joinPvPRoom()" style="padding: 8px 12px; background: #ff9800; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">参加</button>
+          <button onclick="joinPvPRoom()" style="padding: 8px 12px; background: #ff9800color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">参加</button>
         </div>
       </div>
       <div id="pvp-status-display" style="margin-top: 15px; font-size: 13px; color: #ffeb3b; font-weight: bold;"></div>
+      <!-- CPUバトル用簡易アリーナエリア -->
+      <div id="cpu-battle-arena" style="display: none; margin-top: 20px; border-top: 1px solid #444; padding-top: 15px;">
+        <h4 style="color: #4caf50; margin: 0 0 10px 0;">🤖 CPUバトル進行中</h4>
+        <p id="battle-log" style="font-size: 12px; color: #ddd; background: #111; padding: 10px; border-radius: 6px; min-height: 40px; text-align: left;">バトル開始ボタンを押してね！</p>
+        <button onclick="executeCpuTurn()" style="padding: 8px 16px; background: #e74c3c; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">攻撃する！</button>
+      </div>
     </div>
   </div>
 
   <!-- 🃏 4. デッキ構築画面 -->
   <div id="screen-deck" class="screen">
     <div class="panel-box">
-      <div class="section-title">🃏 デッキ構築</div>
-      <p style="font-size: 13px; color: #ccc;">所持しているファミリアからデッキを編成しよう！</p>
+      <div class="section-title">🃏 デッキ構築 (3枚選択)</div>
+      <p style="font-size: 13px; color: #ccc;">所持しているファミリアからバトル用デッキに編成しよう！</p>
       <div class="card-grid" id="deck-grid"></div>
     </div>
   </div>
 
   <!-- 🎁 5. パック開封画面 -->
   <div id="screen-pack" class="screen">
-    <div class="panel-box">
+    <div class="panel-box" style="text-align: center;">
       <div class="section-title">🎁 パック開封</div>
-      <p style="font-size: 13px; color: #ccc;">コインを使って新しいファミリアを手に入れよう！</p>
+      <p style="font-size: 13px; color: #ccc;">100G消費してパックをひらこう！</p>
+      <button onclick="openPack()" style="padding: 12px 24px; background: #e67e22; color: #fff; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; margin-bottom: 15px;">🎁 1パック開封する (100G)</button>
+      <div class="card-grid" id="pack-result-grid"></div>
     </div>
   </div>
 
@@ -142,9 +150,8 @@
 
   <!-- 📜 JavaScript ロジック -->
   <script>
-    const MAX_CARDS = 100;
+const MAX_CARDS = 100;
     
-    // 属性アイコンの定義
     const ATTR_ICONS = {
       fire: 'icons/icon_fire.jpg',
       grass: 'icons/icon_grass.jpg',
@@ -178,18 +185,18 @@
       {id:20,name:'魔獣の守護霊',rarity:'SR',attr:'thunder',basePrice:170,img:'familiars/20.jpg'}
     ];
 
-    let userData = { coins: 1000, inventory: {}, deckIds: [] };
+    let userData = { coins: 1000, inventory: {}, deckIds: [1, 2, 3] };
 
     function initDefaultData() {
       const s = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20];
-      userData = { coins: 1000, inventory: {}, deckIds: [1,2,3] };
+      userData = { coins: 1000, inventory: {}, deckIds: [1, 2, 3] };
       s.forEach(id => { userData.inventory[id] = (userData.inventory[id] || 0) + 1; });
     }
 
     function loadUserData() {
       try {
         const saved = localStorage.getItem('isekai_tcg_v3');
-        if (saved) { userData = JSON.parse(saved); if (!userData.inventory) initDefaultData(); }
+        if (saved) { userData = JSON.parse(saved); if (!userData.inventory) initDefaultData(); if(!userData.deckIds) userData.deckIds = [1,2,3]; }
         else { initDefaultData(); saveUserData(); }
       } catch(e) { initDefaultData(); }
       updateHeaderUI();
@@ -246,6 +253,7 @@
       }
     }
 
+    // 📖 図鑑描画
     function renderCollection() {
       const grid = document.getElementById('collection-grid');
       if (!grid) return;
@@ -276,16 +284,134 @@
       updateHeaderUI();
     }
 
+    // 🃏 デッキ構築機能
     function renderDeck() {
       const grid = document.getElementById('deck-grid');
       if (!grid) return;
-      grid.innerHTML = '<p style="font-size:12px; color:#aaa;">デッキ編成機能は準備完了！お気に入りのファミリアをセットしよう。</p>';
+      grid.innerHTML = '';
+
+      CARD_MASTER.forEach(card => {
+        const count = userData.inventory[card.id] || 0;
+        if (count <= 0) return; // 持っていないカードは除外
+
+        const isSelected = userData.deckIds.includes(card.id);
+        const cardDiv = document.createElement('div');
+        cardDiv.className = `card rarity-${card.rarity}`;
+        if (isSelected) cardDiv.style.border = '2px solid #2ecc71';
+
+        const attrIconPath = ATTR_ICONS[card.attr] || ATTR_ICONS['none'];
+
+        cardDiv.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center; font-size:9px;">
+            <span>[${card.rarity}]</span>
+            <img src="${attrIconPath}" style="width:14px; height:14px; border-radius:50%; object-fit:cover;" alt="attr">
+          </div>
+          <div class="card-art"><img src="${card.img}" alt="${card.name}"></div>
+          <div class="card-name">${card.name}</div>
+          <div style="text-align:center; font-size:9px; margin-top:auto; color:${isSelected ? '#2ecc71' : '#aaa'}; font-weight:bold;">
+            ${isSelected ? '✅ デッキ内' : 'タップで編成'}
+          </div>
+        `;
+
+        cardDiv.onclick = () => {
+          if (isSelected) {
+            if (userData.deckIds.length <= 1) {
+              alert('デッキには最低1枚のファミリアが必要です！');
+              return;
+            }
+            userData.deckIds = userData.deckIds.filter(id => id !== card.id);
+          } else {
+            if (userData.deckIds.length >= 5) {
+              alert('デッキには最大5枚までしか編成できません！');
+              return;
+            }
+            userData.deckIds.push(card.id);
+          }
+          saveUserData();
+          renderDeck();
+        };
+
+        grid.appendChild(cardDiv);
+      });
     }
 
+    // 🎁 パック開封機能
+    function openPack() {
+      if (userData.coins < 100) {
+        alert('ゴールドが足りません！（100G必要です）');
+        return;
+      }
+      userData.coins -= 100;
+
+      // ランダムで1枚排出（N:60%, R:25%, SR:12%, UR:3% のイメージ）
+      const rand = Math.random() * 100;
+      let targetRarity = 'N';
+      if (rand > 97) targetRarity = 'UR';
+      else if (rand > 85) targetRarity = 'SR';
+      else if (rand > 60) targetRarity = 'R';
+
+      const pool = CARD_MASTER.filter(c => c.rarity === targetRarity);
+      const gotCard = pool[Math.floor(Math.random() * pool.length)];
+
+      userData.inventory[gotCard.id] = (userData.inventory[gotCard.id] || 0) + 1;
+      saveUserData();
+
+      const resultGrid = document.getElementById('pack-result-grid');
+      const attrIconPath = ATTR_ICONS[gotCard.attr] || ATTR_ICONS['none'];
+      
+      resultGrid.innerHTML = `
+        <div style="margin-bottom:8px; font-size:12px; color:#ffd700; font-weight:bold;">🎉 獲得ファミリア！</div>
+        <div class="card rarity-${gotCard.rarity}" style="margin: 0 auto;">
+          <div style="display:flex; justify-content:space-between; align-items:center; font-size:9px;">
+            <span>[${gotCard.rarity}]</span>
+            <img src="${attrIconPath}" style="width:14px; height:14px; border-radius:50%; object-fit:cover;" alt="attr">
+          </div>
+          <div class="card-art"><img src="${gotCard.img}" alt="${gotCard.name}"></div>
+          <div class="card-name">${gotCard.name}</div>
+          <div style="text-align:center; font-size:9px; margin-top:auto; color:#2ecc71;">NEW!</div>
+        </div>
+      `;
+    }
+
+    // ⚖️ 取引所（売買機能）
     function renderMarket() {
       const grid = document.getElementById('market-grid');
       if (!grid) return;
-      grid.innerHTML = '<p style="font-size:12px; color:#aaa;">取引所マーケットは稼働中！カードの売買が可能。</p>';
+      grid.innerHTML = '';
+
+      CARD_MASTER.forEach(card => {
+        const count = userData.inventory[card.id] || 0;
+        const cardDiv = document.createElement('div');
+        cardDiv.className = `card rarity-${card.rarity}`;
+        if (count <= 0) cardDiv.style.opacity = '0.4';
+
+        const attrIconPath = ATTR_ICONS[card.attr] || ATTR_ICONS['none'];
+
+        cardDiv.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center; font-size:9px;">
+            <span>[${card.rarity}]</span>
+            <img src="${attrIconPath}" style="width:14px; height:14px; border-radius:50%; object-fit:cover;" alt="attr">
+          </div>
+          <div class="card-art"><img src="${card.img}" alt="${card.name}"></div>
+          <div class="card-name">${card.name}</div>
+          <div style="text-align:center; font-size:9px; margin-top:auto; color:#f1c40f;">売却: +${card.basePrice}G</div>
+        `;
+
+        cardDiv.onclick = () => {
+          if (count <= 0) {
+            alert('持っていないファミリアは売却できません！');
+            return;
+          }
+          if (confirm(`${card.name} を ${card.basePrice}G で売却しますか？`)) {
+            userData.inventory[card.id]--;
+            userData.coins += card.basePrice;
+            saveUserData();
+            renderMarket();
+          }
+        };
+
+        grid.appendChild(cardDiv);
+      });
     }
 
     function resetSaveData() {
@@ -294,6 +420,21 @@
         saveUserData();
         renderCollection();
       }
+    }
+
+    // ⚔️ バトル進行（CPU戦スタート）
+    function startCpuBattle() {
+      const arena = document.getElementById('cpu-battle-arena');
+      arena.style.display = 'block';
+      document.getElementById('battle-log').innerText = '野生のモンスターが現れた！バトル開始！';
+    }
+
+    function executeCpuTurn() {
+      const log = document.getElementById('battle-log');
+      const damage = Math.floor(100 + Math.random() * 150);
+      log.innerText = `キミのファミリアの攻撃！ モンスターに ${damage} のダメージを与えた！ (勝利して100G獲得！) `;
+      userData.coins += 100;
+      saveUserData();
     }
 
     // PeerJS 通信対戦ロジック
@@ -326,6 +467,8 @@
       const codeInput = document.getElementById('pvp-code-input').value.trim();
       if (!codeInput || codeInput.length !== 4) {
         alert('正しい4桁の合言葉を入力してください！');
+        const codeInputEl = document.getElementById('pvp-code-input');
+        if (codeInputEl) codeInputEl.value = '';
         return;
       }
       isHost = false;
@@ -357,10 +500,6 @@
 
     function startOnlineBattle() {
       alert("オンライン対戦画面へ移行します！");
-    }
-
-    function startCpuBattle() {
-      alert("CPU戦を開始します！");
     }
   </script>
 
