@@ -178,7 +178,7 @@
 
     function initDefaultData() {
       const s = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20];
-      userData = { coins: 1000, inventory: {}, deckIds: [...] };
+      userData = { coins: 1000, inventory: {}, deckIds: [] };
       s.forEach(id => { userData.inventory[id] = (userData.inventory[id] || 0) + 1; });
     }
 
@@ -214,8 +214,7 @@
       }
       loadUserData();
       switchTab('home');
-      render
-Collection();
+      renderCollection();
     }
 
     // 7つのタブ切り替え
@@ -349,6 +348,5 @@ Collection();
       console.log("CPU戦を開始");
     }
   </script>
-
 </body>
 </html>
