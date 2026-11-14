@@ -130,6 +130,27 @@
 </div>
 
 <div id="screen-battle" class="screen active">
+ <div id="screen-battle" class="screen active">
+  
+  <!-- ▼▼▼ ここにバトルメニューUIを挿入！ ▼▼▼ -->
+  <div id="battle-menu-container" style="text-align: center; padding: 20px; background: #262336; border-radius: 12px; margin-bottom: 10px;">
+    <h3 style="color: #ffd700; margin-bottom: 15px;">⚔️ バトルモード選択</h3>
+    <div style="display: flex; flex-direction: column; gap: 10px; max-width: 300px; margin: 0 auto;">
+      <button onclick="startCpuBattle()" style="padding: 12px; font-weight: bold; background: #4caf50; color: #fff; border: none; border-radius: 8px; cursor: pointer;">🤖 CPU対戦（ソロ戦）</button>
+      <button onclick="createPvPRoom()" style="padding: 12px; font-weight: bold; background: #2196f3; color: #fff; border: none; border-radius: 8px; cursor: pointer;">🏠 PvP対戦（部屋を作る）</button>
+      <div style="background: #1a1824; padding: 10px; border-radius: 8px; border: 1px solid #444;">
+        <p style="margin: 0 0 8px 0; font-size: 13px; color: #ccc;">PvPコード入力（対戦に参加）</p>
+        <input type="text" id="pvp-code-input" placeholder="4桁の合言葉" style="padding: 8px; width: 60%; text-align: center; border-radius: 4px; border: 1px solid #666; background: #111; color: #fff; font-size: 14px;">
+        <button onclick="joinPvPRoom()" style="padding: 8px 12px; background: #ff9800; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">参加</button>
+      </div>
+    </div>
+    <div id="pvp-status-display" style="margin-top: 15px; font-size: 13px; color: #ffeb3b; font-weight: bold;"></div>
+  </div>
+  <!-- ▲▲▲ 挿入ここまで ▲▲▲ -->
+
+  <div class="panel-box">
+    <!-- 元々のバトル盤面のコードがここから続く -->
+
   <div class="panel-box">
     <div class="status-bar"><div>🤖 CPU（勝利:+100G）</div><div>山:<span id="cpu-deck-count">0</span> 手:<span id="cpu-hand-count">0</span></div><div class="life">❤️ <span id="cpu-life">5</span></div></div>
     <div class="field-row" id="cpu-field"></div>
@@ -667,6 +688,88 @@ function replaceAttrEmojis() {
 }
 
 setInterval(replaceAttrEmojis, 300);
+      // --- いま元々あるゲームのスクリプト（cpuTurnやinitGameなど） ---
+    function cpuTurn() {
+      // ... 既存のコード ...
+    }
+
+    function initGame() {
+      // ... 既存のコード ...
+    }
+
+    // ▼▼▼ ここに一番下として、通信対戦用のコードを丸ごと追加する！ ▼▼▼
+    let peer = null;
+    let conn = null;
+    let isHost = false;
+
+    function createPvPRoom() {
+      const roomCode = Math.floor(1000 + Math.random() * 9000);
+      isHost = true;
+      document.getElementById('pvp-status-display').innerText = `部屋を作成中... 合言葉: [ ${roomCode} ] を相手に伝えてね！`;
+
+      if (peer) peer.destroy();
+      peer = new Peer('grimoire-' + roomCode);
+
+      peer.on('open', (id) => { console.log('Host ready:', id); });
+      peer.on('connection', (connection) => {
+        conn = connection;
+        document.getElementById('pvp-status-display').innerText = '対戦相手が接続しました！まもなくバトル開始！';
+        setupConnectionEvents();
+        setTimeout(startOnlineBattle, 1000);
+      });
+      peer.on('error', (err) => {
+        console.error(err);
+        document.getElementById('pvp-status-display').innerText = 'エラーが発生しました。';
+      });
+    }
+
+    function joinPvPRoom() {
+      const codeInput = document.getElementById('pvp-code-input').value.trim();
+      if (!codeInput || codeInput.length !== 4) {
+        alert('正しい4桁の合言葉を入力してください！');
+        return;
+      }
+      isHost = false;
+      document.getElementById('pvp-status-display').innerText = `合言葉 ${codeInput} の部屋に接続中...`;
+
+      if (peer) peer.destroy();
+      peer = new Peer();
+
+      peer.on('open', () => {
+        conn = peer.connect('grimoire-' + codeInput);
+        conn.on('open', () => {
+          document.getElementById('pvp-status-display').innerText = '部屋に接続成功！バトル開始！';
+          setupConnectionEvents();
+          setTimeout(startOnlineBattle, 1000);
+        });
+        conn.on('error', (err) => {
+          console.error(err);
+          document.getElementById('pvp-status-display').innerText = '部屋が見つかりません。';
+        });
+      });
+    }
+
+    function setupConnectionEvents() {
+      if (!conn) return;
+      conn.on('data', (data) => {
+        console.log('受信:', data);
+      });
+    }
+
+    function startOnlineBattle() {
+      console.log("オンライン対戦画面へ移行");
+    }
+
+    function startCpuBattle() {
+      console.log("CPU戦を開始");
+      // 今まで動いていたCPU戦の処理（ゲーム開始関数など）をここに繋ぐ！
+    }
+    // ▲▲▲ 追加ここまで ▲▲▲
+
+  </script> <!-- ←元々の最後のscriptタグ -->
+</body>
+</html>
+
 </script>
   <!-- カード長押し拡大モーダル -->
 <div id="card-zoom-modal" onclick="closeCardZoom()">
