@@ -4,110 +4,44 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>グリモアファミリア</title>
-  <!-- ▼ ここにPeerJSのライブラリを追加！ ▼ -->
+  <!-- PeerJSライブラリ -->
   <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
   <style>
-    /* 今あるCSSスタイルはそのままここへ */
-  body{font-family:sans-serif;background:#0e101a;color:#fff;margin:0;padding:8px;display:flex;flex-direction:column;align-items:center;user-select:none}
-  .top-header{width:100%;max-width:820px;background:#181b2c;border:2px solid #4a4e69;border-radius:10px;padding:8px 12px;margin-bottom:8px;box-sizing:border-box;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
-  .game-title{font-size:15px;font-weight:bold;color:#ffd700}
-  .wallet-info{display:flex;gap:12px;font-size:13px;font-weight:bold}
-  .coin-text{color:#f1c40f}
-  .cap-text{color:#7bed9f}
-  .nav-tabs{display:flex;width:100%;max-width:820px;gap:4px;margin-bottom:8px}
-  .tab-btn{flex:1;background:#252940;color:#ccc;border:1px solid #4a4e69;padding:8px 2px;border-radius:8px;font-weight:bold;font-size:11px;cursor:pointer}
-  .tab-btn.active{background:linear-gradient(180deg,#ff9f43,#ee5253);color:#fff;border-color:#ffd700}
-  .screen{display:none;width:100%;max-width:820px}
-  .screen.active{display:block}
-  .panel-box{background:#202336;border:2px solid #4a4e69;border-radius:12px;padding:10px;box-sizing:border-box}
-  .status-bar{display:flex;justify-content:space-between;align-items:center;background:#141622;padding:6px 12px;border-radius:8px;margin-bottom:6px;font-weight:bold;font-size:12px}
-  .life{font-size:16px;color:#ff6b6b}
-  .dungeon-zone{text-align:center;background:#2f2644;border:1px dashed #a29bfe;padding:5px;border-radius:8px;margin-bottom:6px;font-size:11px}
-  .field-row{display:flex;justify-content:center;gap:8px;min-height:175px;margin:5px 0;padding:6px;background:rgba(0,0,0,0.3);border-radius:8px}
-  .hand-row,.card-grid{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;min-height:165px;margin-top:6px;padding:8px;background:#181a29;border-radius:8px}
-  .card{width:110px;height:168px;background:#2f334d;border:2px solid #888;border-radius:8px;padding:4px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;position:relative;overflow:hidden;font-size:9.5px}
-  .card.selected{border-color:#ffd700!important;box-shadow:0 0 14px #ffd700!important;transform:translateY(-6px)}
-  .card.exhausted{opacity:0.65}
-  .attr-fire{background:linear-gradient(160deg,#5c1919,#241010)}
-  .attr-grass{background:linear-gradient(160deg,#174d2c,#0e2116)}
-  .attr-thunder{background:linear-gradient(160deg,#594910,#241e0b)}
-  .attr-water{background:linear-gradient(160deg,#143d5e,#0d1c29)}
-  .attr-light{background:linear-gradient(160deg,#615e48,#29271e)}
-  .attr-dark{background:linear-gradient(160deg,#451b59,#1b0d24)}
-  .attr-none{background:linear-gradient(160deg,#384959,#1b2229)}
-  .rarity-N{border:2px solid #7f8c8d}
-  .rarity-R{border:2px solid #bdc3c7;box-shadow:0 0 6px rgba(236,240,241,0.4)}
-  .rarity-SR{border:2px solid #f1c40f;box-shadow:0 0 10px rgba(241,196,15,0.7)}
-  .rarity-UR{border:2px solid #ff79c6;box-shadow:0 0 14px rgba(255,121,198,0.9)}
-  .card-header{display:flex;justify-content:space-between;align-items:center;font-weight:bold;font-size:9.5px}
-  .rarity-badge{font-size:8.5px;font-weight:bold;padding:0 3px;border-radius:3px;background:rgba(0,0,0,0.7)}
-  .badge-N{color:#bdc3c7}.badge-R{color:#74b9ff}.badge-SR{color:#ffd700}.badge-UR{background:linear-gradient(90deg,#ff79c6,#8be9fd,#f1fa8c);color:#111}
-  .card-name{font-weight:bold;font-size:10.5px;margin:2px 0;text-align:center;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .card-art{width:100%;height:56px;border:1px solid rgba(255,255,255,0.35);border-radius:5px;margin-bottom:3px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
-  .card-art img{width:100%;height:100%;object-fit:cover;z-index:4}
-  .art-ring{position:absolute;width:46px;height:46px;border-radius:50%;border:2px dashed rgba(255,255,255,0.45)}
-  .art-main{font-size:26px;z-index:2}
-  .art-sub{position:absolute;bottom:2px;right:4px;font-size:13px;z-index:3}
-  .card-desc{font-size:8px;line-height:1.2;color:#eee;flex-grow:1;overflow:hidden}
-  .card-power{display:flex;justify-content:space-between;align-items:center;font-weight:bold;font-size:11.5px;color:#ffd700;border-top:1px solid rgba(255,255,255,0.2);padding-top:2px}
-  .equip-badge{background:#e67e22;color:#fff;font-size:7.5px;padding:1px 3px;border-radius:3px;margin-top:1px;text-align:center}
-  .controls{display:flex;justify-content:center;gap:8px;margin:6px 0;flex-wrap:wrap}
-  button{background:#ff8c00;color:#fff;border:none;padding:8px 14px;border-radius:6px;font-weight:bold;cursor:pointer;font-size:12px}
-  button:disabled{background:#555;cursor:not-allowed}
-  .log-box{width:100%;height:75px;background:#11131c;border:1px solid #333;border-radius:8px;padding:6px;margin-top:6px;overflow-y:auto;font-size:10.5px;box-sizing:border-box;line-height:1.4}
-  .guide-text{font-size:11.5px;color:#7bed9f;text-align:center;margin:4px 0;font-weight:bold}
-  .pack-banner{background:linear-gradient(135deg,#2c1e4a,#192a56);border:2px solid #ffd700;border-radius:12px;padding:14px;text-align:center;margin-bottom:10px}
-  .market-item{background:#181a29;border:1px solid #4a4e69;border-radius:10px;padding:8px;display:flex;flex-direction:column;align-items:center;gap:6px}
-  .price-tag{font-size:12px;font-weight:bold;color:#f1c40f}
-  .count-badge{position:absolute;top:22px;right:4px;background:rgba(0,0,0,0.85);color:#fff;border:1px solid #ffd700;border-radius:10px;padding:1px 6px;font-size:10px;font-weight:bold;z-index:5}
-  .section-title{font-size:13px;font-weight:bold;color:#ffd700;margin:8px 0 6px;border-left:4px solid #ff8c00;padding-left:8px}
-  .deck-bar{display:flex;justify-content:space-between;align-items:center;background:#141622;padding:8px 12px;border-radius:8px;margin-bottom:8px;flex-wrap:wrap;gap:6px}
-/* カード長押し対策＆拡大モーダル */
-.card, .mini-card, .deck-card, .dex-card {
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  user-select: none;
-}
+    body { font-family: sans-serif; background: #0e01a; color: #fff; margin: 0; padding: 8px; display: flex; flex-direction: column; align-items: center; box-sizing: border-box; }
+    .top-header { width: 100%; max-width: 820px; background: #181b2c; border: 2px solid #4a4e69; border-radius: 10px; padding: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; box-sizing: border-box; }
+    .game-title { font-size: 15px; font-weight: bold; color: #ffd700; }
+    .wallet-info { display: flex; gap: 12px; font-size: 13px; font-weight: bold; }
+    .coin-text { color: #ffc40f; }
+    .cap-text { color: #7bed9f; }
+    
+    /* 7つのタブのスタイル */
+    .nav-tabs { display: flex; width: 100%; max-width: 820px; gap: 4px; overflow-x: auto; padding: 4px; background: #1a1824; border-radius: 8px; margin-bottom: 10px; box-sizing: border-box; }
+    .tab-btn { flex: 1; background: #252940; color: #ccc; border: 1px solid #4a4e69; padding: 8px 4px; font-size: 11px; border-radius: 6px; cursor: pointer; text-align: center; white-space: nowrap; }
+    .tab-btn.active { background: linear-gradient(180deg, #ff9f43, #ee5253); color: #fff; border-color: #ffd700; font-weight: bold; }
+    
+    .screen { display: none; width: 100%; max-width: 820px; box-sizing: border-box; }
+    .screen.active { display: block; }
+    .panel-box { background: #202336; border: 2px solid #4a4e69; border-radius: 12px; padding: 10px; box-sizing: border-box; margin-bottom: 10px; }
+    
+    .section-title { font-size: 13px; font-weight: bold; color: #ffd700; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+    
+    /* カードグリッド・カードデザイン */
+    .card-grid { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+    .card { width: 110px; height: 168px; background: #2f334d; border: 2px solid #688; border-radius: 8px; padding: 6px; box-sizing: border-box; display: flex; flex-direction: column; position: relative; font-size: 10px; cursor: pointer; }
+    .card-name { font-weight: bold; font-size: 10.5px; margin: 2px 0; text-align: center; color: #fff; }
+    .card-art { width: 100%; height: 56px; background: #111; border: 1px solid rgba(255,255,255,0.35); border-radius: 4px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .card-art img { width: 100%; height: 100%; object-fit: cover; }
 
-#card-zoom-modal {
-  display: none;
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(4px);
-  z-index: 9999;
-  justify-content: center;
-  align-items: center;
-  animation: fadeInZoom 0.15s ease-out;
-}
-
-#card-zoom-modal.active {
-  display: flex;
-}
-
-.zoom-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  transform: scale(1.65); /* カードを1.65倍に拡大 */
-}
-
-.zoom-hint {
-  margin-top: 14px;
-  color: #ccc;
-  font-size: 10px;
-  letter-spacing: 0.1em;
-}
-
-@keyframes fadeInZoom {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
-}
-</style>
+    /* レアリティ枠 */
+    .rarity-N { border: 2px solid #7f8c8d; }
+    .rarity-R { border: 2px solid #3498db; }
+    .rarity-SR { border: 2px solid #f1c40f; }
+    .rarity-UR { border: 2px solid #9b59b6; }
+  </style>
 </head>
 <body>
-    <!-- 🎮 タイトル画面（起動時に表示） -->
+
+  <!-- 🎮 起動時タイトル画面 -->
   <div id="screen-title" class="screen active" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #121019; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; cursor: pointer;" onclick="startGameFromTitle()">
     <h1 style="font-size: 28px; color: #ffd700; margin-bottom: 10px; text-shadow: 0 0 10px rgba(255,215,0,0.5);">✨ グリモアファミリア ✨</h1>
     <p style="font-size: 14px; color: #aaa; margin-bottom: 40px;">- Grimoire Familia -</p>
@@ -116,594 +50,239 @@
     </div>
   </div>
 
-  <!-- 📋 7つのタブボタン -->
-  <div class="nav-tabs" style="display: flex; gap: 4px; overflow-x: auto; padding: 4px; background: #1a1824; border-radius: 8px; margin-bottom: 10px;">
-    <button id="tab-home" class="tab-btn active" onclick="switchTab('home')" style="flex: 1; padding: 8px 4px; font-size: 11px; white-space: nowrap;">🏠 ホーム</button>
-    <button id="tab-dungeon" class="tab-btn" onclick="switchTab('dungeon')" style="flex: 1; padding: 8px 4px; font-size: 11px; white-space: nowrap;">🏰 ダンジョン</button>
-    <button id="tab-battle" class="tab-btn" onclick="switchTab('battle')" style="flex: 1; padding: 8px 4px; font-size: 11px; white-space: nowrap;">⚔️ バトル</button>
-    <button id="tab-deck" class="tab-btn" onclick="switchTab('deck')" style="flex: 1; padding: 8px 4px; font-size: 11px; white-space: nowrap;">🃏 デッキ</button>
-    <button id="tab-pack" class="tab-btn" onclick="switchTab('pack')" style="flex: 1; padding: 8px 4px; font-size: 11px; white-space: nowrap;">🎁 パック</button>
-    <button id="tab-market" class="tab-btn" onclick="switchTab('market')" style="flex: 1; padding: 8px 4px; font-size: 11px; white-space: nowrap;">⚖️ 取引所</button>
-    <button id="tab-collection" class="tab-btn" onclick="switchTab('collection')" style="flex: 1; padding: 8px 4px; font-size: 11px; white-space: nowrap;">📖 グリモア</button>
+  <!-- 🔝 トップヘッダー -->
+  <div class="top-header">
+    <div class="game-title">⚔️ グリモアファミリア</div>
+    <div class="wallet-info">
+      <div class="coin-text">💰 <span id="ui-coins">1000</span>G</div>
+      <div class="cap-text">📦 所持: <span id="ui-total-cards">0</span>/100枚</div>
+    </div>
   </div>
 
-<div class="top-header">
-  <div class="game-title">⚔️ グリモアファミリア</div>
-  <div class="wallet-info">
-    <div class="coin-text">💰 <span id="ui-coins">1000</span> G</div>
-    <div class="cap-text">📦 所持: <span id="ui-total-cards">20</span> / 100枚</div>
+  <!-- 📋 7つのタブナビゲーション -->
+  <div class="nav-tabs">
+    <button id="tab-home" class="tab-btn active" onclick="switchTab('home')">🏠 ホーム</button>
+    <button id="tab-dungeon" class="tab-btn" onclick="switchTab('dungeon')">🏰 ダンジョン</button>
+    <button id="tab-battle" class="tab-btn" onclick="switchTab('battle')">⚔️ バトル</button>
+    <button id="tab-deck" class="tab-btn" onclick="switchTab('deck')">🃏 デッキ構築</button>
+    <button id="tab-pack" class="tab-btn" onclick="switchTab('pack')">🎁 パック開封</button>
+    <button id="tab-market" class="tab-btn" onclick="switchTab('market')">⚖️ 取引所</button>
+    <button id="tab-collection" class="tab-btn" onclick="switchTab('collection')">📖 グリモア</button>
   </div>
-</div>
 
-<div id="screen-battle" class="screen active">
- <div id="screen-battle" class="screen active">
-  
-  <!-- ▼▼▼ ここにバトルメニューUIを挿入！ ▼▼▼ -->
-  <div id="battle-menu-container" style="text-align: center; padding: 20px; background: #262336; border-radius: 12px; margin-bottom: 10px;">
-    <h3 style="color: #ffd700; margin-bottom: 15px;">⚔️ バトルモード選択</h3>
-    <div style="display: flex; flex-direction: column; gap: 10px; max-width: 300px; margin: 0 auto;">
-      <button onclick="startCpuBattle()" style="padding: 12px; font-weight: bold; background: #4caf50; color: #fff; border: none; border-radius: 8px; cursor: pointer;">🤖 CPU対戦（ソロ戦）</button>
-      <button onclick="createPvPRoom()" style="padding: 12px; font-weight: bold; background: #2196f3; color: #fff; border: none; border-radius: 8px; cursor: pointer;">🏠 PvP対戦（部屋を作る）</button>
-      <div style="background: #1a1824; padding: 10px; border-radius: 8px; border: 1px solid #444;">
-        <p style="margin: 0 0 8px 0; font-size: 13px; color: #ccc;">PvPコード入力（対戦に参加）</p>
-        <input type="text" id="pvp-code-input" placeholder="4桁の合言葉" style="padding: 8px; width: 60%; text-align: center; border-radius: 4px; border: 1px solid #666; background: #111; color: #fff; font-size: 14px;">
-        <button onclick="joinPvPRoom()" style="padding: 8px 12px; background: #ff9800; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">参加</button>
+  <!-- 🏠 1. ホーム画面 -->
+  <div id="screen-home" class="screen">
+    <div class="panel-box">
+      <div class="section-title">🏠 ホーム画面</div>
+      <p style="font-size: 13px; color: #ccc;">グリモアファミリアへようこそ！上のタブから好きなモードを選んで冒険や対戦を進めよう！</p>
+    </div>
+  </div>
+
+  <!-- 🏰 2. ダンジョン画面 -->
+  <div id="screen-dungeon" class="screen">
+    <div class="panel-box">
+      <div class="section-title">🏰 ダンジョン攻略</div>
+      <p style="font-size: 13px; color: #ccc;">ダンジョンに挑んで報酬を手に入れよう！（準備中）</p>
+    </div>
+  </div>
+
+  <!-- ⚔️ 3. バトル画面 -->
+  <div id="screen-battle" class="screen">
+    <div class="panel-box" style="text-align: center; background: #262336;">
+      <h3 style="color: #ffd700; margin-top: 0; margin-bottom: 15px;">⚔️ バトルモード選択</h3>
+      <div style="display: flex; flex-direction: column; gap: 10px; max-width: 300px; margin: 0 auto;">
+        <button onclick="startCpuBattle()" style="padding: 12px; font-weight: bold; background: #4caf50; color: #fff; border: none; border-radius: 8px; cursor: pointer;">🤖 CPU対戦（ソロ戦）</button>
+        <button onclick="createPvPRoom()" style="padding: 12px; font-weight: bold; background: #2196f3; color: #fff; border: none; border-radius: 8px; cursor: pointer;">🏠 PvP対戦（部屋を作る）</button>
+        <div style="background: #1a1824; padding: 10px; border-radius: 8px; border: 1px solid #444;">
+          <p style="margin: 0 0 8px 0; font-size: 13px; color: #ccc;">PvPコード入力（対戦に参加）</p>
+          <input type="text" id="pvp-code-input" placeholder="4桁の合言葉" style="padding: 8px; width: 60%; text-align: center; border-radius: 4px; border: 1px solid #666; background: #111; color: #fff; font-size: 14px;">
+          <button onclick="joinPvPRoom()" style="padding: 8px 12px; background: #ff9800; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">参加</button>
+        </div>
       </div>
+      <div id="pvp-status-display" style="margin-top: 15px; font-size: 13px; color: #ffeb3b; font-weight: bold;"></div>
     </div>
-    <div id="pvp-status-display" style="margin-top: 15px; font-size: 13px; color: #ffeb3b; font-weight: bold;"></div>
   </div>
-  <!-- ▲▲▲ 挿入ここまで ▲▲▲ -->
 
-  <div class="panel-box">
-    <!-- 元々のバトル盤面のコードがここから続く -->
-
-  <div class="panel-box">
-    <div class="status-bar"><div>🤖 CPU（勝利:+100G）</div><div>山:<span id="cpu-deck-count">0</span> 手:<span id="cpu-hand-count">0</span></div><div class="life">❤️ <span id="cpu-life">5</span></div></div>
-    <div class="field-row" id="cpu-field"></div>
-    <div class="dungeon-zone" id="dungeon-zone">🏰 ダンジョン：なし</div>
-    <div class="guide-text" id="guide-text">手札を使うか、🟢攻撃可のファミリアを選んでバトル！</div>
-    <div class="field-row" id="player-field"></div>
-    <div class="controls">
-      <button id="btn-direct" onclick="directAttack()" disabled>⚡ ダイレクトアタック！</button>
-      <button id="btn-end" onclick="endPlayerTurn()">ターン終了 ▶</button>
-      <button onclick="initGame()" style="background:#576574;">再戦</button>
+  <!-- 🃏 4. デッキ構築画面 -->
+  <div id="screen-deck" class="screen">
+    <div class="panel-box">
+      <div class="section-title">🃏 デッキ構築</div>
+      <p style="font-size: 13px; color: #ccc;">お気に入りのカードで最強のデッキを組もう！（準備中）</p>
     </div>
-    <div class="status-bar"><div>🧙‍♂️ あなた</div><div>山:<span id="player-deck-count">0</span> 墓:<span id="player-grave-count">0</span></div><div class="life">❤️ <span id="player-life">5</span></div></div>
-    <div class="hand-row" id="player-hand"></div>
-    <div class="log-box" id="log-box"></div>
   </div>
-</div>
 
-<div id="screen-deck" class="screen">
-  <div class="panel-box">
-    <div class="deck-bar">
-      <div style="font-weight:bold;font-size:13px;">🃏 現在のデッキ：<span id="deck-count-text" style="color:#7bed9f;">20</span> / 20枚（同名2枚まで）</div>
-      <div style="display:flex;gap:6px;">
-        <button onclick="autoBuildDeck()" style="background:#2980b9;padding:6px 10px;font-size:11px;">⚡ 自動おすすめ</button>
-        <button onclick="saveDeckAndPlay()" style="background:#27ae60;padding:6px 10px;font-size:11px;">💾 保存して対戦</button>
+  <!-- 🎁 5. パック開封画面 -->
+  <div id="screen-pack" class="screen">
+    <div class="panel-box">
+      <div class="section-title">🎁 パック開封</div>
+      <p style="font-size: 13px; color: #ccc;">パックを剥いて新しいカードをゲットしよう！（準備中）</p>
+    </div>
+  </div>
+
+  <!-- ⚖️ 6. 取引所画面 -->
+  <div id="screen-market" class="screen">
+    <div class="panel-box">
+      <div class="section-title">⚖️ 取引所（マーケット）</div>
+      <p style="font-size: 13px; color: #ccc;">カードの売買やトレードができるよ！（準備中）</p>
+    </div>
+  </div>
+
+  <!-- 📖 7. グリモア（コレクション）画面 -->
+  <div id="screen-collection" class="screen">
+    <div class="panel-box">
+      <div class="section-title">
+        <span>📖 ファミリア図鑑＆所持数 (上限100枚)</span>
+        <button onclick="resetSaveData()" style="font-size: 10px; padding: 4px 8px; background: #c0392b; color: #fff; border: none; border-radius: 4px; cursor: pointer;">データリセット</button>
       </div>
+      <div class="card-grid" id="collection-grid"></div>
     </div>
-    <div class="section-title">▼ デッキ内のカード（タップで外す）</div>
-    <div class="card-grid" id="deck-current-grid" style="min-height:110px;"></div>
-    <div class="section-title">▼ 所持カードから追加（タップで入れる）</div>
-    <div class="card-grid" id="deck-pool-grid"></div>
   </div>
-</div>
 
-<div id="screen-pack" class="screen">
-  <div class="panel-box">
-    <div class="pack-banner">
-      <div style="font-size:16px;font-weight:bold;color:#ffd700;margin-bottom:6px;">✨ 第1弾：異世界覚醒パック（3枚入り） ✨</div>
-      <div style="font-size:11px;color:#ddd;margin-bottom:10px;">排出率：N 55% / R 25% / SR 15% / UR 5%（上限100枚）</div>
-      <button onclick="buyPack()" style="font-size:14px;padding:10px 20px;background:linear-gradient(90deg,#f39c12,#e74c3c);">🎁 1パック開封（100 G）</button>
-    </div>
-    <div class="section-title">開封結果</div>
-    <div class="card-grid" id="pack-result-grid"><div style="color:#888;font-size:12px;padding:30px 0;">上のボタンからパックを開封しよう！</div></div>
-  </div>
-</div>
+  <!-- 📜 JavaScript ロジック ＆ カードマスターデータ -->
+  <script>
+    const MAX_CARDS = 100;
+    const ATTR_INFO = {
+      fire: { icon: '🔥火', strongAgainst: 'grass', cls: 'attr-fire' },
+      grass: { icon: '🌿草', strongAgainst: 'thunder', cls: 'attr-grass' },
+      thunder: { icon: '⚡雷', strongAgainst: 'water', cls: 'attr-thunder' },
+      water: { icon: '💧水', strongAgainst: 'fire', cls: 'attr-water' },
+      light: { icon: '☀️光', strongAgainst: 'dark', cls: 'attr-light' },
+      dark: { icon: '🌙闇', strongAgainst: 'light', cls: 'attr-dark' }
+    };
 
-<div id="screen-market" class="screen">
-  <div class="panel-box">
-    <div style="display:flex;justify-content:space-between;align-items:center;">
-      <div class="section-title" style="margin:0;">🛒 マーケット出品中（購入）</div>
-      <button onclick="refreshMarket()" style="padding:5px 10px;font-size:11px;background:#2980b9;">🔄 更新</button>
-    </div>
-    <div class="card-grid" id="market-buy-grid"></div>
-    <div class="section-title">💰 自分のカードを出品（売却）</div>
-    <div class="card-grid" id="market-sell-grid"></div>
-  </div>
-</div>
+    // ファミリアマスターデータ（画像パス付き）
+    const CARD_MASTER = [
+      {id:1,name:'フレイムウルフ',rarity:'N',basePrice:30,img:'familiars/01.jpg'},
+      {id:2,name:'紅蓮のイフリート',rarity:'SR',basePrice:180,img:'familiars/02.jpg'},
+      {id:3,name:'リーフフェアリー',rarity:'N',basePrice:30,img:'familiars/03.jpg'},
+      {id:4,name:'古代樹のトレント',rarity:'R',basePrice:80,img:'familiars/04.jpg'},
+      {id:5,name:'サンダーバード',rarity:'R',basePrice:90,img:'familiars/05.jpg'},
+      {id:6,name:'雷帝ライジン',rarity:'SR',basePrice:180,img:'familiars/06.jpg'},
+      {id:7,name:'アクアスライム',rarity:'N',basePrice:30,img:'familiars/07.jpg'},
+      {id:8,name:'深海竜リヴァイアサン',rarity:'UR',basePrice:450,img:'familiars/08.jpg'},
+      {id:9,name:'ホーリーエンジェル',rarity:'R',basePrice:80,img:'familiars/09.jpg'},
+      {id:10,name:'聖騎士アルテミス',rarity:'SR',basePrice:190,img:'familiars/10.jpg'},
+      {id:11,name:'シャドウバット',rarity:'N',basePrice:30,img:'familiars/11.jpg'},
+      {id:12,name:'魔王ディアボロス',rarity:'UR',basePrice:480,img:'familiars/12.jpg'},
+      {id:13,name:'灼熱のマグマ火山',rarity:'R',basePrice:70,img:'familiars/13.jpg'},
+      {id:14,name:'精霊の聖なる森',rarity:'R',basePrice:70,img:'familiars/14.jpg'},
+      {id:15,name:'混沌の異次元空間',rarity:'SR',basePrice:160,img:'familiars/15.jpg'},
+      {id:16,name:'知恵の古文書',rarity:'R',basePrice:100,img:'familiars/16.jpg'},
+      {id:17,name:'炎火の爆巻スクロール',rarity:'N',basePrice:40,img:'familiars/17.jpg'},
+      {id:18,name:'緊急召喚の巻物',rarity:'N',basePrice:40,img:'familiars/18.jpg'},
+      {id:19,name:'聖剣エクスカリバー',rarity:'UR',basePrice:420,img:'familiars/19.jpg'},
+      {id:20,name:'魔獣の守護霊',rarity:'SR',basePrice:170,img:'familiars/20.jpg'}
+    ];
 
-<div id="screen-collection" class="screen">
-  <div class="panel-box">
-    <div style="display:flex;justify-content:space-between;align-items:center;">
-      <div class="section-title" style="margin:0;">📚 ファミリア図鑑＆所持数（上限100枚）</div>
-      <button onclick="resetSaveData()" style="padding:5px 10px;font-size:10px;background:#c0392b;">初期化</button>
-    </div>
-    <div class="card-grid" id="collection-grid"></div>
-  </div>
-</div>
-<script>
-const MAX_CARDS=100;
-const ATTR_INFO={fire:{icon:'🔥火',strongAgainst:'grass',cls:'attr-fire'},grass:{icon:'🌿草',strongAgainst:'thunder',cls:'attr-grass'},thunder:{icon:'⚡雷',strongAgainst:'water',cls:'attr-thunder'},water:{icon:'💧水',strongAgainst:'fire',cls:'attr-water'},light:{icon:'☀️光',strongAgainst:'dark',cls:'attr-light'},dark:{icon:'🌙闇',strongAgainst:'light',cls:'attr-dark'},none:{icon:'✨無',strongAgainst:null,cls:'attr-none'}};
+    let userData = { coins: 1000, inventory: {}, deckIds: [] };
 
-const CARD_MASTER=[
-  {id:1,name:'フレイムウルフ',rarity:'N',basePrice:30,img:'familiars/01.jpg',bg:'radial-gradient(circle,#ff6b35,#3d0c02)',main:'🐺',sub:'🔥',type:'summon',attr:'fire',power:2,desc:'【登場時】手札1枚捨ててパワー2以下破壊'},
-  {id:2,name:'紅蓮のイフリート',rarity:'SR',basePrice:180,img:'familiars/02.jpg',bg:'radial-gradient(circle,#e74c3c,#2c0404)',main:'👹',sub:'💥',type:'summon',attr:'fire',power:4,desc:'場に他の🔥火がいればパワー+1'},
-  {id:3,name:'リーフフェアリー',rarity:'N',basePrice:30,img:'familiars/03.jpg',bg:'radial-gradient(circle,#2ecc71,#092b16)',main:'🧚',sub:'🍃',type:'summon',attr:'grass',power:1,desc:'【登場時】カードを1枚引く'},
-  {id:4,name:'古代樹のトレント',rarity:'R',basePrice:80,img:'familiars/04.jpg',bg:'radial-gradient(circle,#27ae60,#0d2112)',main:'🌳',sub:'🛡️',type:'summon',attr:'grass',power:4,desc:'相手ターン中、パワー+1'},
-  {id:5,name:'サンダーバード',rarity:'R',basePrice:90,img:'familiars/05.jpg',bg:'radial-gradient(circle,#f1c40f,#332702)',main:'🦅',sub:'⚡',type:'summon',attr:'thunder',power:2,desc:'【速攻】出したターンすぐ攻撃可！'},
-  {id:6,name:'雷帝ライジン',rarity:'SR',basePrice:180,img:'familiars/06.jpg',bg:'radial-gradient(circle,#f39c12,#1f1703)',main:'👺',sub:'🌩️',type:'summon',attr:'thunder',power:4,desc:'【登場時】相手1体のパワー-1'},
-  {id:7,name:'アクアスライム',rarity:'N',basePrice:30,img:'familiars/07.jpg',bg:'radial-gradient(circle,#3498db,#082036)',main:'💧',sub:'🫧',type:'summon',attr:'water',power:1,desc:'【破壊時】カードを1枚引く'},
-  {id:8,name:'深海竜リヴァイアサン',rarity:'UR',basePrice:450,img:'familiars/08.jpg',bg:'radial-gradient(circle,#00cec9,#04182b)',main:'🐉',sub:'🌊',type:'summon',attr:'water',power:5,desc:'圧倒的パワーを誇る海の王者'},
-  {id:9,name:'ホーリーエンジェル',rarity:'R',basePrice:80,img:'familiars/09.jpg',bg:'radial-gradient(circle,#ffeaa7,#3d3719)',main:'👼',sub:'✨',type:'summon',attr:'light',power:3,desc:'【登場時】ライフを1回復（最大5）'},
-  {id:10,name:'聖騎士アルテミス',rarity:'SR',basePrice:190,img:'familiars/10.jpg',bg:'radial-gradient(circle,#fdcb6e,#2e2914)',main:'🦸',sub:'⚔️',type:'summon',attr:'light',power:4,desc:'「神器」装備中ならパワー+2'},
-  {id:11,name:'シャドウバット',rarity:'N',basePrice:30,img:'familiars/11.jpg',bg:'radial-gradient(circle,#6c5ce7,#170b26)',main:'🦇',sub:'🌙',type:'summon',attr:'dark',power:2,desc:'相手手札3枚以上ならパワー+2'},
-  {id:12,name:'魔王ディアボロス',rarity:'UR',basePrice:480,img:'familiars/12.jpg',bg:'radial-gradient(circle,#e056fd,#190524)',main:'😈',sub:'💀',type:'summon',attr:'dark',power:5,desc:'【登場時】ライフ-1して相手1体破壊'},
-  {id:13,name:'灼熱のマグマ火山',rarity:'R',basePrice:70,img:'familiars/13.jpg',bg:'linear-gradient(180deg,#ff7675,#2d0909)',main:'🌋',sub:'🔥',type:'dungeon',attr:'fire',power:0,desc:'お互いの🔥火と⚡雷はパワー+1'},
-  {id:14,name:'精霊の聖なる森',rarity:'R',basePrice:70,img:'familiars/14.jpg',bg:'linear-gradient(180deg,#55efc4,#0a291a)',main:'🌲',sub:'💧',type:'dungeon',attr:'grass',power:0,desc:'お互いの🌿草と💧水はパワー+1'},
-  {id:15,name:'混沌の異次元空間',rarity:'SR',basePrice:160,img:'familiars/15.jpg',bg:'linear-gradient(180deg,#a29bfe,#160929)',main:'🌌',sub:'🌀',type:'dungeon',attr:'dark',power:0,desc:'お互いの☀️光と🌙闇はパワー+1'},
-  {id:16,name:'知恵の古文書',rarity:'R',basePrice:100,img:'familiars/16.jpg',bg:'radial-gradient(circle,#74b9ff,#172336)',main:'📖',sub:'✨',type:'scroll',attr:'none',power:0,desc:'山札からカードを2枚引く'},
-  {id:17,name:'業火の爆裂スクロール',rarity:'N',basePrice:40,img:'familiars/17.jpg',bg:'radial-gradient(circle,#ff7675,#330d09)',main:'🧨',sub:'💥',type:'scroll',attr:'fire',power:0,desc:'相手のパワー3以下を1体破壊！'},
-  {id:18,name:'緊急召喚の巻物',rarity:'N',basePrice:40,img:'familiars/18.jpg',bg:'radial-gradient(circle,#81ecec,#142b2b)',main:'📜',sub:'🔄',type:'scroll',attr:'none',power:0,desc:'墓地から召喚獣1体を手札に戻す'},
-  {id:19,name:'聖剣エクスカリバー',rarity:'UR',basePrice:420,img:'familiars/19.jpg',bg:'radial-gradient(circle,#ffeaa7,#2c3e50)',main:'🗡️',sub:'🌟',type:'relic',attr:'light',power:0,desc:'装備した召喚獣のパワー+2'},
-  {id:20,name:'竜鱗の守護盾',rarity:'SR',basePrice:170,img:'familiars/20.jpg',bg:'radial-gradient(circle,#74b9ff,#0c2438)',main:'🛡️',sub:'🐉',type:'relic',attr:'water',power:0,desc:'装備した召喚獣は効果で破壊されない'}
-];
-
-let userData={coins:300,inventory:{},deckIds:[],marketListings:[]};
-function initDefaultData(){
-  const s=[1,1,2,3,3,4,5,5,6,7,7,8,9,10,11,13,14,16,17,19];
-  userData={coins:300,inventory:{},deckIds:[...s],marketListings:[]};
-  s.forEach(id=>{userData.inventory[id]=(userData.inventory[id]||0)+1;});
-  refreshMarket(true);
-}
-function loadUserData(){
-  try{
-    const saved=localStorage.getItem('isekai_tcg_v3');
-    if(saved){userData=JSON.parse(saved);if(!userData||!userData.inventory)initDefaultData();if(!userData.deckIds)userData.deckIds=[];}
-    else{initDefaultData();saveUserData();}
-  }catch(e){initDefaultData();}
-  updateHeaderUI();
-}
-function saveUserData(){
-  try{localStorage.setItem('isekai_tcg_v3',JSON.stringify(userData));}catch(e){}
-  updateHeaderUI();
-}
-function getTotalCardCount(){return Object.values(userData.inventory).reduce((a,b)=>a+b,0);}
-function updateHeaderUI(){
-  document.getElementById('ui-coins').innerText=userData.coins;
-  const t=getTotalCardCount(),el=document.getElementById('ui-total-cards');
-  el.innerText=t;el.style.color=(t>=MAX_CARDS)?'#ff6b6b':'#7bed9f';
-}
-function resetSaveData(){
-  if(!confirm('データを初期化するわよ？'))return;
-  try{localStorage.removeItem('isekai_tcg_v3');}catch(e){}
-  initDefaultData();saveUserData();renderCollection();renderMarket();renderDeckBuilder();
-}
-function switchTab(name){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('screen-'+name).classList.add('active');
-  const btn=document.getElementById('tab-'+name);if(btn)btn.classList.add('active');
-  if(name==='deck')renderDeckBuilder();
-  if(name==='market')renderMarket();
-  if(name==='collection')renderCollection();
-}
-
-function renderDeckBuilder(){
-  const ct=document.getElementById('deck-count-text');
-  ct.innerText=userData.deckIds.length;
-  ct.style.color=(userData.deckIds.length===20)?'#7bed9f':'#ff6b6b';
-  const inDeck={};userData.deckIds.forEach(id=>{inDeck[id]=(inDeck[id]||0)+1;});
-  const cg=document.getElementById('deck-current-grid');cg.innerHTML='';
-  if(userData.deckIds.length===0)cg.innerHTML='<div style="color:#888;font-size:12px;padding:25px;">下の所持カードから20枚選びなさい！</div>';
-  [...userData.deckIds].sort((a,b)=>a-b).forEach(id=>{
-    const c=CARD_MASTER.find(x=>x.id===id);
-    const d=document.createElement('div');d.className=`card ${ATTR_INFO[c.attr].cls} rarity-${c.rarity}`;
-    d.innerHTML=renderCardInner(c,'player',false,true);d.onclick=()=>removeFromDeck(id);cg.appendChild(d);
-  });
-  const pg=document.getElementById('deck-pool-grid');pg.innerHTML='';
-  Object.keys(userData.inventory).forEach(k=>{
-    const id=parseInt(k,10),owned=userData.inventory[id]||0;if(owned<=0)return;
-    const used=inDeck[id]||0,maxUse=Math.min(2,owned),c=CARD_MASTER.find(x=>x.id===id);
-    const w=document.createElement('div');w.style.position='relative';w.style.opacity=(used>=maxUse)?'0.45':'1';
-    w.innerHTML=`<div class="count-badge">${used}/${maxUse}枚</div><div class="card ${ATTR_INFO[c.attr].cls} rarity-${c.rarity}">${renderCardInner(c,'player',false,true)}</div>`;
-    w.onclick=()=>addToDeck(id);pg.appendChild(w);
-  });
-}
-function addToDeck(id){
-  if(userData.deckIds.length>=20){alert('デッキは20枚までよ！');return;}
-  const owned=userData.inventory[id]||0,used=userData.deckIds.filter(x=>x===id).length;
-  if(used>=Math.min(2,owned)){alert('同名2枚まで（または所持上限）よ！');return;}
-  userData.deckIds.push(id);renderDeckBuilder();
-}
-function removeFromDeck(id){
-  const i=userData.deckIds.indexOf(id);if(i!==-1){userData.deckIds.splice(i,1);renderDeckBuilder();}
-}
-function autoBuildDeck(){
-  const sorted=[...CARD_MASTER].sort((a,b)=>(b.power-a.power)||(b.basePrice-a.basePrice));
-  let nd=[];
-  for(const c of sorted){
-    const take=Math.min(2,userData.inventory[c.id]||0,20-nd.length);
-    for(let i=0;i<take;i++)nd.push(c.id);
-    if(nd.length>=20)break;
-  }
-  userData.deckIds=nd;renderDeckBuilder();
-}
-function saveDeckAndPlay(){
-  if(userData.deckIds.length!==20){alert(`ピッタリ20枚にしなさい！（現在${userData.deckIds.length}枚）`);return;}
-  saveUserData();alert('✅ デッキを保存したわ！');switchTab('battle');initGame();
-}
-function buyPack(){
-  if(getTotalCardCount()+3>MAX_CARDS){alert(`上限(${MAX_CARDS}枚)を超えるわ！取引所で売りなさい！`);return;}
-  if(userData.coins<100){alert('コインが足りないわよ！(100G)');return;}
-  userData.coins-=100;
-  const grid=document.getElementById('pack-result-grid');grid.innerHTML='';
-  for(let i=0;i<3;i++){
-    const r=Math.random()*100;
-    const rar=r<5?'UR':r<20?'SR':r<45?'R':'N';
-    const pool=CARD_MASTER.filter(c=>c.rarity===rar);
-    const p=pool[Math.floor(Math.random()*pool.length)];
-    userData.inventory[p.id]=(userData.inventory[p.id]||0)+1;
-    const d=document.createElement('div');d.className=`card ${ATTR_INFO[p.attr].cls} rarity-${p.rarity}`;
-    d.innerHTML=renderCardInner(p,'player',false,true);grid.appendChild(d);
-  }
-  saveUserData();
-}
-
-function refreshMarket(silent=false){
-  const sellers=['召喚士カイト','魔女リリア','商人バルス','少年リュウ','竜騎士セイラ'];
-  userData.marketListings=[];
-  for(let i=0;i<6;i++){
-    const c=CARD_MASTER[Math.floor(Math.random()*CARD_MASTER.length)];
-    const price=Math.max(20,Math.round((c.basePrice*(0.8+Math.random()*0.5))/10)*10);
-    userData.marketListings.push({cardId:c.id,price,seller:sellers[Math.floor(Math.random()*sellers.length)]});
-  }
-  if(!silent){saveUserData();renderMarket();}
-}
-function buyFromMarket(idx){
-  if(getTotalCardCount()>=MAX_CARDS){alert(`上限(${MAX_CARDS}枚)がいっぱいよ！`);return;}
-  const it=userData.marketListings[idx];if(!it)return;
-  if(userData.coins<it.price){alert('コインが足りないわよ！');return;}
-  userData.coins-=it.price;userData.inventory[it.cardId]=(userData.inventory[it.cardId]||0)+1;
-  userData.marketListings.splice(idx,1);saveUserData();renderMarket();
-}
-function sellToMarket(id){
-  if((userData.inventory[id]||0)<=0)return;
-  if(getTotalCardCount()<=20){alert('デッキ用の20枚は残しておきなさい！');return;}
-  const c=CARD_MASTER.find(x=>x.id===id);
-  const inp=prompt(`「${c.name}」の出品価格を入力（相場:${c.basePrice}G）`,c.basePrice);
-  if(inp===null)return;
-  const sp=parseInt(inp,10);
-  if(isNaN(sp)||sp<10||sp>1000){alert('10〜1000Gで入力しなさい！');return;}
-  if(sp>c.basePrice*1.8){alert('高すぎて売れなかったわ！相場に近づけなさい！');return;}
-  userData.inventory[id]-=1;if(userData.inventory[id]<=0)delete userData.inventory[id];
-  const maxA=userData.inventory[id]||0;
-  while(userData.deckIds.filter(x=>x===id).length>maxA)userData.deckIds.splice(userData.deckIds.indexOf(id),1);
-  userData.coins+=sp;saveUserData();renderMarket();alert(`🎉 ${sp}G で売れたわ！`);
-}
-function renderMarket(){
-  const bg=document.getElementById('market-buy-grid');bg.innerHTML='';
-  userData.marketListings.forEach((it,idx)=>{
-    const c=CARD_MASTER.find(x=>x.id===it.cardId);
-    const w=document.createElement('div');w.className='market-item';
-    w.innerHTML=`<div style="font-size:10px;color:#a29bfe;">${it.seller}</div><div class="card ${ATTR_INFO[c.attr].cls} rarity-${c.rarity}">${renderCardInner(c,'player',false,true)}</div><div class="price-tag">💰 ${it.price} G</div><button onclick="buyFromMarket(${idx})" style="padding:5px 12px;font-size:11px;background:#27ae60;">購入</button>`;
-    bg.appendChild(w);
-  });
-  const sg=document.getElementById('market-sell-grid');sg.innerHTML='';
-  Object.keys(userData.inventory).forEach(k=>{
-    const id=parseInt(k,10),cnt=userData.inventory[id];if(cnt<=0)return;
-    const c=CARD_MASTER.find(x=>x.id===id);
-    const w=document.createElement('div');w.className='market-item';
-    w.innerHTML=`<div style="position:relative;"><div class="count-badge">×${cnt}</div><div class="card ${ATTR_INFO[c.attr].cls} rarity-${c.rarity}">${renderCardInner(c,'player',false,true)}</div></div><div style="font-size:10px;color:#ccc;">相場:${c.basePrice}G</div><button onclick="sellToMarket(${id})" style="padding:5px 12px;font-size:11px;background:#e67e22;">出品</button>`;
-    sg.appendChild(w);
-  });
-}
-function renderCollection(){
-  const g=document.getElementById('collection-grid');g.innerHTML='';
-  CARD_MASTER.forEach(c=>{
-    const cnt=userData.inventory[c.id]||0;
-    const w=document.createElement('div');w.style.position='relative';w.style.opacity=cnt>0?'1':'0.3';
-    w.innerHTML=`<div class="count-badge">${cnt}枚</div><div class="card ${ATTR_INFO[c.attr].cls} rarity-${c.rarity}">${renderCardInner(c,'player',false,true)}</div>`;
-    g.appendChild(w);
-  });
-}
-
-let state={};
-function log(m){const b=document.getElementById('log-box');b.innerHTML+=`<div>▶ ${m}</div>`;b.scrollTop=b.scrollHeight;}
-function getBattlePlayerDeck(){
-  let ids=[...userData.deckIds];if(ids.length!==20){autoBuildDeck();ids=[...userData.deckIds];}
-  ids.sort(()=>Math.random()-0.5);
-  return ids.map(id=>({...CARD_MASTER.find(c=>c.id===id),uid:Math.random()}));
-}
-function createCpuDeck(){
-  const l=[1,1,2,3,3,4,5,5,6,7,7,8,9,10,11,12,13,14,16,17,19,20].sort(()=>Math.random()-0.5);
-  return l.slice(0,20).map(id=>({...CARD_MASTER.find(c=>c.id===id),uid:Math.random()}));
-}
-function initGame(){
-  document.getElementById('log-box').innerHTML='';
-  state={turn:'player',turnCount:1,dungeon:null,summonedThisTurn:false,selectedAttackerIdx:null,pendingRelicHandIdx:null,gameOver:false,player:{life:5,deck:getBattlePlayerDeck(),hand:[],field:[],grave:[]},cpu:{life:5,deck:createCpuDeck(),hand:[],field:[],grave:[]}};
-  for(let i=0;i<3;i++){drawCard('player');drawCard('cpu');}
-  log('バトル開始！マイデッキで勝利を目指しなさい！');updateUI();
-}
-function drawCard(w){const p=state[w];if(p.deck.length>0)p.hand.push(p.deck.pop());}
-function getEffectivePower(u,owner,isTurn){
-  let p=u.power+(u.tempMod||0),f=state[owner].field;
-  if(u.id===2&&f.some(x=>x.uid!==u.uid&&x.attr==='fire'))p+=1;
-  if(u.id===4&&!isTurn)p+=1;
-  if(u.id===10&&u.equip)p+=2;
-  if(u.id===11&&state[owner==='player'?'cpu':'player'].hand.length>=3)p+=2;
-  if(u.equip&&u.equip.id===19)p+=2;
-  if(state.dungeon){
-    if(state.dungeon.id===13&&(u.attr==='fire'||u.attr==='thunder'))p+=1;
-    if(state.dungeon.id===14&&(u.attr==='grass'||u.attr==='water'))p+=1;
-    if(state.dungeon.id===15&&(u.attr==='light'||u.attr==='dark'))p+=1;
-  }
-  return Math.max(0,p);
-}
-function onHandClick(idx){
-  if(state.turn!=='player'||state.gameOver)return;
-  const c=state.player.hand[idx];state.selectedAttackerIdx=null;state.pendingRelicHandIdx=null;
-  if(c.type==='summon'){
-    if(state.summonedThisTurn){alert('召喚獣は1ターンに1体までよ！');return;}
-    if(state.player.field.length>=3){alert('場は最大3体までよ！');return;}
-    playSummon('player',idx);
-  }else if(c.type==='dungeon'){
-    state.dungeon=state.player.hand.splice(idx,1)[0];log(`ダンジョン「${state.dungeon.name}」展開！`);updateUI();
-  }else if(c.type==='scroll'){playScroll('player',idx);}
-  else if(c.type==='relic'){
-    if(state.player.field.length===0){alert('装備させる召喚獣がいないわよ！');return;}
-    state.pendingRelicHandIdx=idx;document.getElementById('guide-text').innerText=`✨「${c.name}」を装備させる召喚獣をクリック！`;updateUI(true);
-  }
-}
-function playSummon(who,hIdx){
-  const p=state[who],opp=state[who==='player'?'cpu':'player'],c=p.hand.splice(hIdx,1)[0];
-  c.canAttack=(c.id===5);c.equip=null;c.tempMod=0;p.field.push(c);
-  if(who==='player')state.summonedThisTurn=true;
-  log(`${who==='player'?'あなた':'CPU'}は「${c.name}(${c.power})」召喚！`);
-  if(c.id===1&&p.hand.length>0){
-    const t=opp.field.findIndex(u=>getEffectivePower(u,who==='player'?'cpu':'player',false)<=2&&(!u.equip||u.equip.id!==20));
-    if(t!==-1){p.grave.push(p.hand.splice(0,1)[0]);destroyUnit(who==='player'?'cpu':'player',t);}
-  }else if(c.id===3){drawCard(who);}
-  else if(c.id===6&&opp.field.length>0){opp.field[0].tempMod=(opp.field[0].tempMod||0)-1;}
-  else if(c.id===9){p.life=Math.min(5,p.life+1);}
-  else if(c.id===12){p.life-=1;const t=opp.field.findIndex(u=>!u.equip||u.equip.id!==20);if(t!==-1)destroyUnit(who==='player'?'cpu':'player',t);checkWin();}
-  updateUI();
-}
-function playScroll(who,hIdx){
-  const p=state[who],opp=state[who==='player'?'cpu':'player'],c=p.hand[hIdx];
-  if(c.id===16){p.grave.push(p.hand.splice(hIdx,1)[0]);drawCard(who);drawCard(who);log('2枚ドロー！');}
-  else if(c.id===17){
-    const t=opp.field.findIndex(u=>getEffectivePower(u,who==='player'?'cpu':'player',false)<=3&&(!u.equip||u.equip.id!==20));
-    if(t===-1){if(who==='player')alert('破壊できる相手がいないわ！');return;}
-    p.grave.push(p.hand.splice(hIdx,1)[0]);destroyUnit(who==='player'?'cpu':'player',t);
-  }else if(c.id===18){
-    const g=p.grave.findIndex(x=>x.type==='summon');
-    if(g===-1){if(who==='player')alert('墓地に召喚獣がいないわ！');return;}
-    p.grave.push(p.hand.splice(hIdx,1)[0]);p.hand.push(p.grave.splice(g,1)[0]);
-  }
-  updateUI();
-}
-function destroyUnit(owner,idx){
-  const u=state[owner].field.splice(idx,1)[0];log(`💥「${u.name}」破壊！`);
-  if(u.equip)state[owner].grave.push(u.equip);state[owner].grave.push(u);
-  if(u.id===7)drawCard(owner);
-}
-function onPlayerFieldClick(idx){
-  if(state.turn!=='player'||state.gameOver)return;
-  const u=state.player.field[idx];
-  if(state.pendingRelicHandIdx!==null){
-    const r=state.player.hand.splice(state.pendingRelicHandIdx,1)[0];
-    if(u.equip)state.player.grave.push(u.equip);u.equip=r;state.pendingRelicHandIdx=null;
-    log(`⚔️「${u.name}」に「${r.name}」装備！`);updateUI();return;
-  }
-  if(!u.canAttack){alert('まだ攻撃できないわ！');return;}
-  state.selectedAttackerIdx=(state.selectedAttackerIdx===idx)?null:idx;updateUI();
-}
-function onCpuFieldClick(tIdx){
-  if(state.turn!=='player'||state.selectedAttackerIdx===null||state.gameOver)return;
-  resolveBattle('player',state.selectedAttackerIdx,'cpu',tIdx);state.selectedAttackerIdx=null;updateUI();
-}
-function directAttack(){
-  if(state.turn!=='player'||state.selectedAttackerIdx===null||state.cpu.field.length>0)return;
-  const u=state.player.field[state.selectedAttackerIdx];u.canAttack=false;state.cpu.life-=1;
-  log(`⚡「${u.name}」のダイレクトアタック！`);state.selectedAttackerIdx=null;checkWin();updateUI();
-}
-function resolveBattle(aOwn,aIdx,dOwn,dIdx){
-  const aU=state[aOwn].field[aIdx],dU=state[dOwn].field[dIdx];aU.canAttack=false;
-  let aP=getEffectivePower(aU,aOwn,true)+(ATTR_INFO[aU.attr].strongAgainst===dU.attr?2:0);
-  let dP=getEffectivePower(dU,dOwn,false)+(ATTR_INFO[dU.attr].strongAgainst===aU.attr?2:0);
-  log(`⚔️「${aU.name}(${aP})」VS「${dU.name}(${dP})」`);
-  if(aP>dP){destroyUnit(dOwn,dIdx);state[dOwn].life-=1;}
-  else if(aP<dP){destroyUnit(aOwn,aIdx);state[aOwn].life-=1;}
-  else{destroyUnit(dOwn,dIdx);destroyUnit(aOwn,aIdx);}
-  checkWin();
-}
-function checkWin(){
-  if(state.gameOver)return;
-  if(state.cpu.life<=0){state.gameOver=true;userData.coins+=100;saveUserData();alert('🎉 勝利！100G ゲット！');}
-  else if(state.player.life<=0){state.gameOver=true;userData.coins+=20;saveUserData();alert('😭 敗北……20G ゲット！');}
-}
-function endPlayerTurn(){
-  if(state.turn!=='player'||state.gameOver)return;
-  state.selectedAttackerIdx=null;state.pendingRelicHandIdx=null;state.player.field.forEach(u=>u.tempMod=0);
-  state.turn='cpu';updateUI();setTimeout(cpuTurn,600);
-}
-function cpuTurn(){
-  if(state.gameOver)return;
-  drawCard('cpu');state.cpu.field.forEach(u=>{u.canAttack=true;u.tempMod=0;});
-  const d=state.cpu.hand.findIndex(c=>c.type==='dungeon');if(d!==-1)state.dungeon=state.cpu.hand.splice(d,1)[0];
-  const s=state.cpu.hand.findIndex(c=>c.type==='scroll'&&c.id===16);if(s!==-1)playScroll('cpu',s);
-  if(state.cpu.field.length<3){
-    let bi=-1,mp=-1;state.cpu.hand.forEach((c,i)=>{if(c.type==='summon'&&c.power>mp){mp=c.power;bi=i;}});
-    if(bi!==-1)playSummon('cpu',bi);
-  }
-  const r=state.cpu.hand.findIndex(c=>c.type==='relic');
-  if(r!==-1&&state.cpu.field.length>0)state.cpu.field[0].equip=state.cpu.hand.splice(r,1)[0];
-  for(let i=state.cpu.field.length-1;i>=0;i--){
-    if(state.gameOver)break;const u=state.cpu.field[i];if(!u||!u.canAttack)continue;
-    if(state.player.field.length===0){u.canAttack=false;state.player.life-=1;log(`⚡CPU「${u.name}」ダイレクトアタック！`);checkWin();}
-    else{
-      const mp=getEffectivePower(u,'cpu',true);
-      const t=state.player.field.findIndex(pu=>(mp+(ATTR_INFO[u.attr].strongAgainst===pu.attr?2:0))>getEffectivePower(pu,'player',false));
-      if(t!==-1)resolveBattle('cpu',i,'player',t);
+    function initDefaultData() {
+      const s = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20];
+      userData = { coins: 1000, inventory: {}, deckIds: [...] };
+      s.forEach(id => { userData.inventory[id] = (userData.inventory[id] || 0) + 1; });
     }
-  }
-  if(!state.gameOver){state.turn='player';state.turnCount++;state.summonedThisTurn=false;drawCard('player');state.player.field.forEach(u=>u.canAttack=true);log(`--- あなたのターン（${state.turnCount}ターン目） ---`);updateUI();}
-}
-function renderCardInner(c,owner,isField,isTurn){
-  const attr=ATTR_INFO[c.attr]||ATTR_INFO.none;
-  const tLbl={summon:'ファミリア',dungeon:'ダンジョン',scroll:'スクロール',relic:'神器'}[c.type];
-  const pVal=isField?getEffectivePower(c,owner,isTurn):c.power;
-  const eq=c.equip?`<div class="equip-badge">⚔️${c.equip.name}</div>`:'';
-  const st=isField?(c.canAttack?'🟢攻撃可':'💤待機'):tLbl;
-  const art=c.img?`<img src="${c.img}" alt="${c.name}">`:`<div class="art-ring"></div><div class="art-main">${c.main}</div><div class="art-sub">${c.sub}</div>`;
-  return `<div class="card-header"><span>${attr.icon}</span><span class="rarity-badge badge-${c.rarity}">${c.rarity}</span></div><div class="card-name">${c.name}</div><div class="card-art" style="background:${c.bg};">${art}</div><div class="card-desc">${c.desc}${eq}</div><div class="card-power"><span style="font-size:8.5px;color:#bbb;">${st}</span><span>${c.type==='summon'?'⚔️'+pVal:''}</span></div>`;
-}
-function updateUI(keep=false){
-  document.getElementById('cpu-life').innerText=state.cpu.life;
-  document.getElementById('cpu-deck-count').innerText=state.cpu.deck.length;
-  document.getElementById('cpu-hand-count').innerText=state.cpu.hand.length;
-  document.getElementById('player-life').innerText=state.player.life;
-  document.getElementById('player-deck-count').innerText=state.player.deck.length;
-  document.getElementById('player-grave-count').innerText=state.player.grave.length;
-  document.getElementById('dungeon-zone').innerHTML=state.dungeon?`🏰 ダンジョン：<b>【${state.dungeon.name}】</b>（${state.dungeon.desc}）`:'🏰 ダンジョン：なし';
-  const cf=document.getElementById('cpu-field');cf.innerHTML='';
-  state.cpu.field.forEach((u,i)=>{const d=document.createElement('div');d.className=`card ${ATTR_INFO[u.attr].cls} rarity-${u.rarity}`;d.innerHTML=renderCardInner(u,'cpu',true,state.turn==='cpu');d.onclick=()=>onCpuFieldClick(i);cf.appendChild(d);});
-  const pf=document.getElementById('player-field');pf.innerHTML='';
-   state.player.field.forEach((u,i)=>{const d=document.createElement('div');d.className=`card ${ATTR_INFO[u.attr].cls} rarity-${u.rarity} ${state.selectedAttackerIdx===i?'selected':''} ${!u.canAttack&&state.turn==='player'?'exhausted':''}`;d.innerHTML=renderCardInner(u,'player',true,state.turn==='player');d.onclick=()=>onPlayerFieldClick(i);pf.appendChild(d);});
-  const ph=document.getElementById('player-hand');ph.innerHTML='';
-  state.player.hand.forEach((c,i)=>{const d=document.createElement('div');d.className=`card ${ATTR_INFO[c.attr].cls} rarity-${c.rarity} ${state.pendingRelicHandIdx===i?'selected':''}`;d.innerHTML=renderCardInner(c,'player',false,true);d.onclick=()=>onHandClick(i);ph.appendChild(d);});
-  document.getElementById('btn-direct').disabled=!(state.turn==='player'&&state.selectedAttackerIdx!==null&&state.cpu.field.length===0);
-  document.getElementById('btn-end').disabled=(state.turn!=='player');
-  if(!keep){
-    const g=document.getElementById('guide-text');
-    if(state.turn!=='player')g.innerText='🤖 CPUが考えています...';
-    else if(state.selectedAttackerIdx!==null)g.innerText=state.cpu.field.length>0?'🎯 攻撃する相手の召喚獣をクリック！':'⚡ ダイレクトアタック！ボタンを押しなさい！';
-    else g.innerText='手札を使うか、🟢攻撃可のファミリアを選んでバトル！';
-  }
-}
-window.onload=function(){loadUserData();initGame();};
-// === カード長押し拡大機能 ===
-let pressTimer = null;
-let isLongPress = false;
 
-function showCardZoom(cardId) {
-  const c = CARD_MASTER.find(x => x.id === Number(cardId));
-  if (!c) return;
-  const modal = document.getElementById('card-zoom-modal');
-  const container = document.getElementById('zoom-card-render');
-  
-  // 既存のカード生成関数があればそれを使い、なければ標準カード枠で描画
-  if (typeof renderCardHTML === 'function') {
-    container.innerHTML = renderCardHTML(c);
-  } else {
-    const imgHtml = c.img 
-      ? `<img src="${c.img}" style="width:100%;height:100%;object-fit:cover;">` 
-      : `<div style="font-size:36px;">${c.main}</div>`;
-    container.innerHTML = `
-      <div class="card rarity-${c.rarity}" style="width:140px;height:200px;background:#1a1a2e;border:2px solid #d4af37;border-radius:10px;padding:8px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 0 25px rgba(255,215,0,0.4);color:#fff;">
-        <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:bold;">
-          <span>${c.sub} ${c.name}</span>
-          <span style="color:#ffd700;">${c.rarity}</span>
-        </div>
-        <div style="height:95px;background:${c.bg};border-radius:6px;overflow:hidden;display:flex;align-items:center;justify-content:center;margin:4px 0;">
-          ${imgHtml}
-        </div>
-        <div style="font-size:9px;background:rgba(0,0,0,0.6);padding:4px;border-radius:4px;line-height:1.3;min-height:42px;">
-          ${c.desc}
-        </div>
-        <div style="display:flex;justify-content:space-between;font-size:10px;font-weight:bold;color:#ff9f43;">
-          <span>${c.type === 'summon' ? 'ファミリア' : c.type}</span>
-          <span>${c.power !== undefined ? 'PWR: ' + c.power : ''}</span>
-        </div>
-      </div>
-    `;
-  }
-  modal.classList.add('active');
-}
-
-function closeCardZoom() {
-  document.getElementById('card-zoom-modal').classList.remove('active');
-}
-
-// 画面全体のタッチ・長押しイベントを監視
-document.addEventListener('touchstart', (e) => {
-  const cardEl = e.target.closest('[data-id], .card, .dex-card, .deck-card');
-  if (!cardEl) return;
-  isLongPress = false;
-  pressTimer = setTimeout(() => {
-    isLongPress = true;
-    // data-id属性があれば優先、なければテキスト内のカード名から検索
-    let id = cardEl.dataset.id;
-    if (!id) {
-      const text = cardEl.innerText || '';
-      const found = CARD_MASTER.find(c => text.includes(c.name));
-      if (found) id = found.id;
+    function loadUserData() {
+      try {
+        const saved = localStorage.getItem('isekai_tcg_v3');
+        if (saved) { userData = JSON.parse(saved); if (!userData.inventory) initDefaultData(); }
+        else { initDefaultData(); saveUserData(); }
+      } catch(e) { initDefaultData(); }
+      updateHeaderUI();
     }
-    if (id) showCardZoom(id);
-  }, 400); // 0.4秒長押しで発動
-}, { passive: true });
 
-document.addEventListener('touchend', () => clearTimeout(pressTimer));
-document.addEventListener('touchmove', () => clearTimeout(pressTimer));
+    function saveUserData() {
+      try { localStorage.setItem('isekai_tcg_v3', JSON.stringify(userData)); } catch(e){}
+      updateHeaderUI();
+    }
 
-// 長押し直後の誤タップ（カード召喚など）を防止
-document.addEventListener('click', (e) => {
-  if (isLongPress) {
-    e.stopPropagation();
-    e.preventDefault();
-    isLongPress = false;
-  }
-}, true);
-// === 属性絵文字を専用紋章オーブ画像に自動変換（安全版） ===
-const ATTR_ICONS = {
-  '🔥': 'icons/icon_fire.jpg',
-  '🌿': 'icons/icon_grass.jpg',
-  '⚡': 'icons/icon_thunder.jpg',
-  '💧': 'icons/icon_water.jpg',
-  '☀️': 'icons/icon_light.jpg',
-  '🌙': 'icons/icon_dark.jpg',
-  '✨': 'icons/icon_none.jpg'
-};
+    function getTotalCardCount() {
+      return Object.values(userData.inventory).reduce((a, b) => a + b, 0);
+    }
 
-let isReplacingAttr = false;
+    function updateHeaderUI() {
+      document.getElementById('ui-coins').innerText = userData.coins;
+      document.getElementById('ui-total-cards').innerText = getTotalCardCount();
+    }
 
-function replaceAttrEmojis() {
-  if (isReplacingAttr || !document.body) return;
-  isReplacingAttr = true;
-  try {
-    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
-    const nodes = [];
-    let n;
-    while (n = walker.nextNode()) {
-      if (n.parentNode && n.parentNode.tagName !== 'SCRIPT' && n.parentNode.tagName !== 'STYLE') {
-        if (/[🔥🌿⚡💧☀️🌙✨]/.test(n.nodeValue)) nodes.push(n);
+    // 起動時タイトル画面を消してホームへ
+    function startGameFromTitle() {
+      const titleScreen = document.getElementById('screen-title');
+      if (titleScreen) {
+        titleScreen.style.display = 'none';
+        titleScreen.classList.remove('active');
+      }
+      loadUserData();
+      switchTab('home');
+      render
+Collection();
+    }
+
+    // 7つのタブ切り替え
+    function switchTab(tabName) {
+      const screens = ['home', 'dungeon', 'battle', 'deck', 'pack', 'market', 'collection'];
+      
+      screens.forEach(s => {
+        const screenEl = document.getElementById('screen-' + s);
+        if (screenEl) screenEl.style.display = 'none';
+        
+        const tabEl = document.getElementById('tab-' + s);
+        if (tabEl) tabEl.classList.remove('active');
+      });
+
+      const targetScreen = document.getElementById('screen-' + tabName);
+      if (targetScreen) targetScreen.style.display = 'block';
+
+      const targetTab = document.getElementById('tab-' + tabName);
+      if (targetTab) targetTab.classList.add('active');
+
+      if (tabName === 'collection') {
+        renderCollection();
       }
     }
-    nodes.forEach(node => {
-      const span = document.createElement('span');
-      span.innerHTML = node.nodeValue.replace(/(🔥|🌿|⚡|💧|☀️|🌙|✨)/g, (m) => {
-        return `<img src="${ATTR_ICONS[m]}" style="width:15px;height:15px;border-radius:50%;vertical-align:middle;object-fit:cover;box-shadow:0 0 4px rgba(0,0,0,0.8);margin:0 1px;">`;
+
+    // 図鑑（グリモア）画面のカード一覧を描画
+    function renderCollection() {
+      const grid = document.getElementById('collection-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      CARD_MASTER.forEach(card => {
+        const count = userData.inventory[card.id] || 0;
+        const isOwned = count > 0;
+        const cardDiv = document.createElement('div');
+        cardDiv.className = `card rarity-${card.rarity}`;
+        
+        if (!isOwned) {
+          cardDiv.style.opacity = '0.4';
+        }
+
+        cardDiv.innerHTML = `
+          <div style="display:flex; justify-content:space-between; font-size:9px;">
+            <span>[${card.rarity}]</span>
+            <span>x${count}</span>
+          </div>
+          <div class="card-art">
+            ${isOwned ? `<img src="${card.img}" alt="${card.name}">` : '❓'}
+          </div>
+          <div class="card-name">${isOwned ? card.name : '？？？'}</div>
+          <div style="text-align:center; font-size:9px; margin-top:auto;">価格: ${card.basePrice}G</div>
+        `;
+        grid.appendChild(cardDiv);
       });
-      if (node.parentNode) node.parentNode.replaceChild(span, node);
-    });
-  } finally {
-    isReplacingAttr = false;
-  }
-}
 
-setInterval(replaceAttrEmojis, 300);
-      // --- いま元々あるゲームのスクリプト（cpuTurnやinitGameなど） ---
-    function cpuTurn() {
-      // ... 既存のコード ...
+      updateHeaderUI();
     }
 
-    function initGame() {
-      // ... 既存のコード ...
+    function resetSaveData() {
+      if (confirm('コレクションデータをリセットしますか？')) {
+        initDefaultData();
+        saveUserData();
+        renderCollection();
+      }
     }
 
-    // ▼▼▼ ここに一番下として、通信対戦用のコードを丸ごと追加する！ ▼▼▼
+    // PeerJS 通信対戦ロジック
     let peer = null;
     let conn = null;
     let isHost = false;
@@ -766,50 +345,10 @@ setInterval(replaceAttrEmojis, 300);
       console.log("オンライン対戦画面へ移行");
     }
 
-        function startCpuBattle() {
+    function startCpuBattle() {
       console.log("CPU戦を開始");
-    }
-
-    // ▼ 画面タッチでタイトル画面を消してホーム画面へ移行する関数
-    function startGameFromTitle() {
-      const titleScreen = document.getElementById('screen-title');
-      if (titleScreen) {
-        titleScreen.style.display = 'none';
-        titleScreen.classList.remove('active');
-      }
-      if (typeof switchTab === 'function') {
-        switchTab('home');
-      }
-    }
-
-    // ▼ 7つのタブを切り替える関数
-    function switchTab(tabName) {
-      const screens = ['home', 'dungeon', 'battle', 'deck', 'pack', 'market', 'collection'];
-      
-      screens.forEach(s => {
-        const screenEl = document.getElementById('screen-' + s);
-        if (screenEl) screenEl.style.display = 'none';
-        
-        const tabEl = document.getElementById('tab-' + s);
-        if (tabEl) tabEl.classList.remove('active');
-      });
-
-      const targetScreen = document.getElementById('screen-' + tabName);
-      if (targetScreen) targetScreen.style.display = 'block';
-
-      const targetTab = document.getElementById('tab-' + tabName);
-      if (targetTab) targetTab.classList.add('active');
     }
   </script>
 
-  <!-- カード長押し拡大モーダル -->
-  <div id="card-zoom-modal" onclick="closeCardZoom()">
-    <div class="zoom-content" onclick="event.stopPropagation()">
-      <div id="zoom-card-render"></div>
-      <p class="zoom-hint">画面タップで閉じる</p>
-    </div>
-  </div>
-
 </body>
 </html>
-
