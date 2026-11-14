@@ -8,13 +8,6 @@
   <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
   <style>
     /* 今あるCSSスタイルはそのままここへ */
-  </style>
-</head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>グリモアファミリア</title>
-<style>
   body{font-family:sans-serif;background:#0e101a;color:#fff;margin:0;padding:8px;display:flex;flex-direction:column;align-items:center;user-select:none}
   .top-header{width:100%;max-width:820px;background:#181b2c;border:2px solid #4a4e69;border-radius:10px;padding:8px 12px;margin-bottom:8px;box-sizing:border-box;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
   .game-title{font-size:15px;font-weight:bold;color:#ffd700}
@@ -114,6 +107,26 @@
 </style>
 </head>
 <body>
+    <!-- 🎮 タイトル画面（起動時に表示） -->
+  <div id="screen-title" class="screen active" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #121019; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; cursor: pointer;" onclick="startGameFromTitle()">
+    <h1 style="font-size: 28px; color: #ffd700; margin-bottom: 10px; text-shadow: 0 0 10px rgba(255,215,0,0.5);">✨ グリモアファミリア ✨</h1>
+    <p style="font-size: 14px; color: #aaa; margin-bottom: 40px;">- Grimoire Familia -</p>
+    <div style="background: #262336; padding: 15px 30px; border-radius: 20px; border: 2px solid #ffd700;">
+      <span style="font-size: 16px; color: #fff; font-weight: bold;">👆 画面をタッチしてスタート</span>
+    </div>
+  </div>
+
+  <!-- 📋 7つのタブボタン -->
+  <div class="nav-tabs" style="display: flex; gap: 4px; overflow-x: auto; padding: 4px; background: #1a1824; border-radius: 8px; margin-bottom: 10px;">
+    <button id="tab-home" class="tab-btn active" onclick="switchTab('home')" style="flex: 1; padding: 8px 4px; font-size: 11px; white-space: nowrap;">🏠 ホーム</button>
+    <button id="tab-dungeon" class="tab-btn" onclick="switchTab('dungeon')" style="flex: 1; padding: 8px 4px; font-size: 11px; white-space: nowrap;">🏰 ダンジョン</button>
+    <button id="tab-battle" class="tab-btn" onclick="switchTab('battle')" style="flex: 1; padding: 8px 4px; font-size: 11px; white-space: nowrap;">⚔️ バトル</button>
+    <button id="tab-deck" class="tab-btn" onclick="switchTab('deck')" style="flex: 1; padding: 8px 4px; font-size: 11px; white-space: nowrap;">🃏 デッキ</button>
+    <button id="tab-pack" class="tab-btn" onclick="switchTab('pack')" style="flex: 1; padding: 8px 4px; font-size: 11px; white-space: nowrap;">🎁 パック</button>
+    <button id="tab-market" class="tab-btn" onclick="switchTab('market')" style="flex: 1; padding: 8px 4px; font-size: 11px; white-space: nowrap;">⚖️ 取引所</button>
+    <button id="tab-collection" class="tab-btn" onclick="switchTab('collection')" style="flex: 1; padding: 8px 4px; font-size: 11px; white-space: nowrap;">📖 グリモア</button>
+  </div>
+
 <div class="top-header">
   <div class="game-title">⚔️ グリモアファミリア</div>
   <div class="wallet-info">
