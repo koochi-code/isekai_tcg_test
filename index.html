@@ -191,9 +191,9 @@ const MAX_CARDS=100;
 const ATTR_INFO={fire:{icon:'🔥火',strongAgainst:'grass',cls:'attr-fire'},grass:{icon:'🌿草',strongAgainst:'thunder',cls:'attr-grass'},thunder:{icon:'⚡雷',strongAgainst:'water',cls:'attr-thunder'},water:{icon:'💧水',strongAgainst:'fire',cls:'attr-water'},light:{icon:'☀️光',strongAgainst:'dark',cls:'attr-light'},dark:{icon:'🌙闇',strongAgainst:'light',cls:'attr-dark'},none:{icon:'✨無',strongAgainst:null,cls:'attr-none'}};
 
 const CARD_MASTER=[
-  {id:1,name:'フレイムウルフ',rarity:'N',basePrice:30,img:'01.jpg',bg:'radial-gradient(circle,#ff6b35,#3d0c02)',main:'🐺',sub:'🔥',type:'summon',attr:'fire',power:2,desc:'【登場時】手札1枚捨ててパワー2以下破壊'},
-  {id:2,name:'紅蓮のイフリート',rarity:'SR',basePrice:180,img:'02.jpg',bg:'radial-gradient(circle,#e74c3c,#2c0404)',main:'👹',sub:'💥',type:'summon',attr:'fire',power:4,desc:'場に他の🔥火がいればパワー+1'},
-  {id:3,name:'リーフフェアリー',rarity:'N',basePrice:30,img:'',bg:'radial-gradient(circle,#2ecc71,#092b16)',main:'🧚',sub:'🍃',type:'summon',attr:'grass',power:1,desc:'【登場時】カードを1枚引く'},
+  {id:1,name:'フレイムウルフ',rarity:'N',basePrice:30,img:'familiars/01.jpg',bg:'radial-gradient(circle,#ff6b35,#3d0c02)',main:'🐺',sub:'🔥',type:'summon',attr:'fire',power:2,desc:'【登場時】手札1枚捨ててパワー2以下破壊'},
+  {id:2,name:'紅蓮のイフリート',rarity:'SR',basePrice:180,img:'familiars/02.jpg',bg:'radial-gradient(circle,#e74c3c,#2c0404)',main:'👹',sub:'💥',type:'summon',attr:'fire',power:4,desc:'場に他の🔥火がいればパワー+1'},
+  {id:3,name:'リーフフェアリー',rarity:'N',basePrice:30,img:'familiars/03.jpg',bg:'radial-gradient(circle,#2ecc71,#092b16)',main:'🧚',sub:'🍃',type:'summon',attr:'grass',power:1,desc:'【登場時】カードを1枚引く'},
   {id:4,name:'古代樹のトレント',rarity:'R',basePrice:80,img:'',bg:'radial-gradient(circle,#27ae60,#0d2112)',main:'🌳',sub:'🛡️',type:'summon',attr:'grass',power:4,desc:'相手ターン中、パワー+1'},
   {id:5,name:'サンダーバード',rarity:'R',basePrice:90,img:'',bg:'radial-gradient(circle,#f1c40f,#332702)',main:'🦅',sub:'⚡',type:'summon',attr:'thunder',power:2,desc:'【速攻】出したターンすぐ攻撃可！'},
   {id:6,name:'雷帝ライジン',rarity:'SR',basePrice:180,img:'',bg:'radial-gradient(circle,#f39c12,#1f1703)',main:'👺',sub:'🌩️',type:'summon',attr:'thunder',power:4,desc:'【登場時】相手1体のパワー-1'},
@@ -621,13 +621,13 @@ document.addEventListener('click', (e) => {
 }, true);
 // === 属性絵文字を専用紋章オーブ画像に自動変換（安全版） ===
 const ATTR_ICONS = {
-  '🔥': 'icon_fire.jpg',
-  '🌿': 'icon_grass.jpg',
-  '⚡': 'icon_thunder.jpg',
-  '💧': 'icon_water.jpg',
-  '☀️': 'icon_light.jpg',
-  '🌙': 'icon_dark.jpg',
-  '✨': 'icon_none.jpg'
+  '🔥': 'icons/icon_fire.jpg',
+  '🌿': 'icons/icon_grass.jpg',
+  '⚡': 'icons/icon_thunder.jpg',
+  '💧': 'icons/icon_water.jpg',
+  '☀️': 'icons/icon_light.jpg',
+  '🌙': 'icons/icon_dark.jpg',
+  '✨': 'icons/icon_none.jpg'
 };
 
 let isReplacingAttr = false;
