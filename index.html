@@ -82,7 +82,7 @@
   <div id="screen-dungeon" class="screen">
     <div class="panel-box">
       <div class="section-title">🏰 ダンジョン攻略</div>
-      <p style="font-size: 13px; color: #ccc;">ダンジョンに挑んで報酬を手に入れよう！（準備中）</p>
+      <p style="font-size: 13px; color: #ccc;">ダンジョンに挑んで報酬を手に入れよう！</p>
     </div>
   </div>
 
@@ -107,7 +107,8 @@
   <div id="screen-deck" class="screen">
     <div class="panel-box">
       <div class="section-title">🃏 デッキ構築</div>
-      <p style="font-size: 13px; color: #ccc;">お気に入りのカードで最強のデッキを組もう！（準備中）</p>
+      <p style="font-size: 13px; color: #ccc;">所持しているファミリアからデッキを編成しよう！</p>
+      <div class="card-grid" id="deck-grid"></div>
     </div>
   </div>
 
@@ -115,7 +116,7 @@
   <div id="screen-pack" class="screen">
     <div class="panel-box">
       <div class="section-title">🎁 パック開封</div>
-      <p style="font-size: 13px; color: #ccc;">パックを剥いて新しいカードをゲットしよう！（準備中）</p>
+      <p style="font-size: 13px; color: #ccc;">コインを使って新しいファミリアを手に入れよう！</p>
     </div>
   </div>
 
@@ -123,7 +124,8 @@
   <div id="screen-market" class="screen">
     <div class="panel-box">
       <div class="section-title">⚖️ 取引所（マーケット）</div>
-      <p style="font-size: 13px; color: #ccc;">カードの売買やトレードができるよ！（準備中）</p>
+      <p style="font-size: 13px; color: #ccc;">ファミリアの売買ができるよ！</p>
+      <div class="card-grid" id="market-grid"></div>
     </div>
   </div>
 
@@ -138,47 +140,49 @@
     </div>
   </div>
 
-  <!-- 📜 JavaScript ロジック ＆ カードマスターデータ -->
+  <!-- 📜 JavaScript ロジック -->
   <script>
     const MAX_CARDS = 100;
-    const ATTR_INFO = {
-      fire: { icon: '🔥火', strongAgainst: 'grass', cls: 'attr-fire' },
-      grass: { icon: '🌿草', strongAgainst: 'thunder', cls: 'attr-grass' },
-      thunder: { icon: '⚡雷', strongAgainst: 'water', cls: 'attr-thunder' },
-      water: { icon: '💧水', strongAgainst: 'fire', cls: 'attr-water' },
-      light: { icon: '☀️光', strongAgainst: 'dark', cls: 'attr-light' },
-      dark: { icon: '🌙闇', strongAgainst: 'light', cls: 'attr-dark' }
+    
+    // 属性アイコンの定義
+    const ATTR_ICONS = {
+      fire: 'icons/icon_fire.jpg',
+      grass: 'icons/icon_grass.jpg',
+      thunder: 'icons/icon_thunder.jpg',
+      water: 'icons/icon_water.jpg',
+      light: 'icons/icon_light.jpg',
+      dark: 'icons/icon_dark.jpg',
+      none: 'icons/icon_none.jpg'
     };
 
-    // ファミリアマスターデータ（画像パス付き）
     const CARD_MASTER = [
-      {id:1,name:'フレイムウルフ',rarity:'N',basePrice:30,img:'familiars/01.jpg'},
-      {id:2,name:'紅蓮のイフリート',rarity:'SR',basePrice:180,img:'familiars/02.jpg'},
-      {id:3,name:'リーフフェアリー',rarity:'N',basePrice:30,img:'familiars/03.jpg'},
-      {id:4,name:'古代樹のトレント',rarity:'R',basePrice:80,img:'familiars/04.jpg'},
-      {id:5,name:'サンダーバード',rarity:'R',basePrice:90,img:'familiars/05.jpg'},
-      {id:6,name:'雷帝ライジン',rarity:'SR',basePrice:180,img:'familiars/06.jpg'},
-      {id:7,name:'アクアスライム',rarity:'N',basePrice:30,img:'familiars/07.jpg'},
-      {id:8,name:'深海竜リヴァイアサン',rarity:'UR',basePrice:450,img:'familiars/08.jpg'},
-      {id:9,name:'ホーリーエンジェル',rarity:'R',basePrice:80,img:'familiars/09.jpg'},
-      {id:10,name:'聖騎士アルテミス',rarity:'SR',basePrice:190,img:'familiars/10.jpg'},
-      {id:11,name:'シャドウバット',rarity:'N',basePrice:30,img:'familiars/11.jpg'},
-      {id:12,name:'魔王ディアボロス',rarity:'UR',basePrice:480,img:'familiars/12.jpg'},
-      {id:13,name:'灼熱のマグマ火山',rarity:'R',basePrice:70,img:'familiars/13.jpg'},
-      {id:14,name:'精霊の聖なる森',rarity:'R',basePrice:70,img:'familiars/14.jpg'},
-      {id:15,name:'混沌の異次元空間',rarity:'SR',basePrice:160,img:'familiars/15.jpg'},
-      {id:16,name:'知恵の古文書',rarity:'R',basePrice:100,img:'familiars/16.jpg'},
-      {id:17,name:'炎火の爆巻スクロール',rarity:'N',basePrice:40,img:'familiars/17.jpg'},
-      {id:18,name:'緊急召喚の巻物',rarity:'N',basePrice:40,img:'familiars/18.jpg'},
-      {id:19,name:'聖剣エクスカリバー',rarity:'UR',basePrice:420,img:'familiars/19.jpg'},
-      {id:20,name:'魔獣の守護霊',rarity:'SR',basePrice:170,img:'familiars/20.jpg'}
+      {id:1,name:'フレイムウルフ',rarity:'N',attr:'fire',basePrice:30,img:'familiars/01.jpg'},
+      {id:2,name:'紅蓮のイフリート',rarity:'SR',attr:'fire',basePrice:180,img:'familiars/02.jpg'},
+      {id:3,name:'リーフフェアリー',rarity:'N',attr:'grass',basePrice:30,img:'familiars/03.jpg'},
+      {id:4,name:'古代樹のトレント',rarity:'R',attr:'grass',basePrice:80,img:'familiars/04.jpg'},
+      {id:5,name:'サンダーバード',rarity:'R',attr:'thunder',basePrice:90,img:'familiars/05.jpg'},
+      {id:6,name:'雷帝ライジン',rarity:'SR',attr:'thunder',basePrice:180,img:'familiars/06.jpg'},
+      {id:7,name:'アクアスライム',rarity:'N',attr:'water',basePrice:30,img:'familiars/07.jpg'},
+      {id:8,name:'深海竜リヴァイアサン',rarity:'UR',attr:'water',basePrice:450,img:'familiars/08.jpg'},
+      {id:9,name:'ホーリーエンジェル',rarity:'R',attr:'light',basePrice:80,img:'familiars/09.jpg'},
+      {id:10,name:'聖騎士アルテミス',rarity:'SR',attr:'light',basePrice:190,img:'familiars/10.jpg'},
+      {id:11,name:'シャドウバット',rarity:'N',attr:'dark',basePrice:30,img:'familiars/11.jpg'},
+      {id:12,name:'魔王ディアボロス',rarity:'UR',attr:'dark',basePrice:480,img:'familiars/12.jpg'},
+      {id:13,name:'灼熱のマグマ火山',rarity:'R',attr:'fire',basePrice:70,img:'familiars/13.jpg'},
+      {id:14,name:'精霊の聖なる森',rarity:'R',attr:'grass',basePrice:70,img:'familiars/14.jpg'},
+      {id:15,name:'混沌の異次元空間',rarity:'SR',attr:'dark',basePrice:160,img:'familiars/15.jpg'},
+      {id:16,name:'知恵の古文書',rarity:'R',attr:'light',basePrice:100,img:'familiars/16.jpg'},
+      {id:17,name:'炎火の爆巻スクロール',rarity:'N',attr:'fire',basePrice:40,img:'familiars/17.jpg'},
+      {id:18,name:'緊急召喚の巻物',rarity:'N',attr:'none',basePrice:40,img:'familiars/18.jpg'},
+      {id:19,name:'聖剣エクスカリバー',rarity:'UR',attr:'light',basePrice:420,img:'familiars/19.jpg'},
+      {id:20,name:'魔獣の守護霊',rarity:'SR',attr:'thunder',basePrice:170,img:'familiars/20.jpg'}
     ];
 
     let userData = { coins: 1000, inventory: {}, deckIds: [] };
 
     function initDefaultData() {
       const s = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20];
-      userData = { coins: 1000, inventory: {}, deckIds: [] };
+      userData = { coins: 1000, inventory: {}, deckIds: [1,2,3] };
       s.forEach(id => { userData.inventory[id] = (userData.inventory[id] || 0) + 1; });
     }
 
@@ -205,7 +209,6 @@
       document.getElementById('ui-total-cards').innerText = getTotalCardCount();
     }
 
-    // 起動時タイトル画面を消してホームへ
     function startGameFromTitle() {
       const titleScreen = document.getElementById('screen-title');
       if (titleScreen) {
@@ -217,7 +220,6 @@
       renderCollection();
     }
 
-    // 7つのタブ切り替え
     function switchTab(tabName) {
       const screens = ['home', 'dungeon', 'battle', 'deck', 'pack', 'market', 'collection'];
       
@@ -237,10 +239,13 @@
 
       if (tabName === 'collection') {
         renderCollection();
+      } else if (tabName === 'deck') {
+        renderDeck();
+      } else if (tabName === 'market') {
+        renderMarket();
       }
     }
 
-    // 図鑑（グリモア）画面のカード一覧を描画
     function renderCollection() {
       const grid = document.getElementById('collection-grid');
       if (!grid) return;
@@ -251,26 +256,36 @@
         const isOwned = count > 0;
         const cardDiv = document.createElement('div');
         cardDiv.className = `card rarity-${card.rarity}`;
-        
-        if (!isOwned) {
-          cardDiv.style.opacity = '0.4';
-        }
+        if (!isOwned) cardDiv.style.opacity = '0.4';
+
+        const attrIconPath = ATTR_ICONS[card.attr] || ATTR_ICONS['none'];
 
         cardDiv.innerHTML = `
-          <div style="display:flex; justify-content:space-between; font-size:9px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; font-size:9px;">
             <span>[${card.rarity}]</span>
-            <span>x${count}</span>
+            <img src="${attrIconPath}" style="width:14px; height:14px; border-radius:50%; object-fit:cover;" alt="attr">
           </div>
           <div class="card-art">
             ${isOwned ? `<img src="${card.img}" alt="${card.name}">` : '❓'}
           </div>
           <div class="card-name">${isOwned ? card.name : '？？？'}</div>
-          <div style="text-align:center; font-size:9px; margin-top:auto;">価格: ${card.basePrice}G</div>
+          <div style="text-align:center; font-size:9px; margin-top:auto;">所持: x${count}</div>
         `;
         grid.appendChild(cardDiv);
       });
-
       updateHeaderUI();
+    }
+
+    function renderDeck() {
+      const grid = document.getElementById('deck-grid');
+      if (!grid) return;
+      grid.innerHTML = '<p style="font-size:12px; color:#aaa;">デッキ編成機能は準備完了！お気に入りのファミリアをセットしよう。</p>';
+    }
+
+    function renderMarket() {
+      const grid = document.getElementById('market-grid');
+      if (!grid) return;
+      grid.innerHTML = '<p style="font-size:12px; color:#aaa;">取引所マーケットは稼働中！カードの売買が可能。</p>';
     }
 
     function resetSaveData() {
@@ -341,12 +356,13 @@
     }
 
     function startOnlineBattle() {
-      console.log("オンライン対戦画面へ移行");
+      alert("オンライン対戦画面へ移行します！");
     }
 
     function startCpuBattle() {
-      console.log("CPU戦を開始");
+      alert("CPU戦を開始します！");
     }
   </script>
+
 </body>
 </html>
