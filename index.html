@@ -29,13 +29,13 @@
     .field-row { display: flex; justify-content: center; gap: 8px; min-height: 174px; padding: 6px; background: rgba(0,0,0,0.25); border-radius: 8px; align-items: center; flex-wrap: wrap; }
     .hand-row, .card-grid { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; padding: 6px; }
 
-    /* カード基本スタイル（フレーム画像フィット調整版） */
+/* カード基本スタイル（新レイアウト・完全フィット版） */
     .card {
       width: 110px;
       height: 160px;
       background: #2f334d;
       border-radius: 8px;
-      padding: 6px 8px 5px 8px; /* 上下左右の枠の太さに合わせた内側余白 */
+      padding: 5px 8px 6px 8px;
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
@@ -49,21 +49,31 @@
     .card.selected { border-color: #ffd700 !important; box-shadow: 0 0 12px #ffd700 !important; transform: translateY(-4px); }
     .card.exhausted { opacity: 0.65; }
 
-    /* 上部：レアリティを右寄せに（左上の属性マークと被らないようにする） */
+    /* 上部：左上の属性マークを避けて、上枠の中にファミリア名を収める */
     .card-header {
       display: flex;
-      justify-content: flex-end;
+      justify-content: center;
       align-items: center;
-      font-size: 8px;
-      height: 12px;
+      height: 14px;
+      padding-left: 16px; /* 左上の属性アイコンと被らない余白 */
       padding-right: 2px;
-      text-shadow: 1px 1px 2px #000;
+    }
+    .card-name {
+      font-weight: bold;
+      font-size: 8px;
+      color: #fff;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 100%;
+      text-shadow: 1px 1px 2px #000, 0 0 4px #000;
     }
 
     /* 中央：イラスト窓の中にピタッと収める */
     .card-art {
-      width: 96%;
-      height: 54px;
+      width: 94%;
+      height: 50px;
       margin: 2px auto 0 auto;
       background: #111;
       border: none;
@@ -72,40 +82,47 @@
     }
     .card-art img { width: 100%; height: 100%; object-fit: cover; }
 
-    /* 下部上段：カード名を効果ボックスの上部に配置 */
-    .card-name {
-      font-weight: bold;
-      font-size: 9px;
-      text-align: center;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      margin-top: 8px; /* 境界線の金枠を避けて下にずらす */
-      text-shadow: 1px 1px 2px #000, 0 0 4px #000;
-    }
-
-    /* 下部中段：効果テキストを暗いボックス内に収める */
+    /* 下部中段：名前が上に移動した分、効果テキスト欄を広々と確保！ */
     .card-desc {
       font-size: 7.5px;
       line-height: 1.2;
       color: #eee;
-      background: transparent; /* 枠自体の背景を活かすため透明に */
-      padding: 2px 3px;
-      height: 36px;
+      background: transparent;
+      padding: 4px 4px 2px 4px;
+      height: 46px;
+      margin-top: 6px; /* 金枠の境界線を避ける */
       overflow: hidden;
       text-shadow: 1px 1px 2px #000;
     }
 
-    /* 最下部：枠の「⚔️ATK」「❤️HP」の右隣に数字が並ぶように調整 */
+    /* 最下部：3つのスロット（ATK数字 / HP数字 / レアリティ＋整理番号） */
     .card-footer {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 8.5px;
+      font-size: 7.5px;
       font-weight: bold;
-      padding: 0 3px 0 18px; /* 左のATK文字を避ける */
-      height: 12px;
-      text-shadow: 1px 1px 2px #000;
+      height: 11px;
+      padding: 0 2px;
+      text-shadow: 1px 1px 2px #000, 0 0 3px #000;
+    }
+    .stat-atk {
+      width: 34%;
+      text-align: right;
+      padding-right: 4px;
+      color: #ffd700;
+    }
+    .stat-hp {
+      width: 33%;
+      text-align: right;
+      padding-right: 4px;
+      color: #ff9ff3;
+    }
+    .stat-right {
+      width: 33%;
+      text-align: right;
+      font-size: 6.8px;
+      color: #fff;
     }
     
  /* 属性フレーム画像（frames/ フォルダから読み込み） */
@@ -435,30 +452,33 @@
       if (tEl) tEl.innerText = getTotalCardCount();
     }
 
-    // 共通カードHTML生成関数
+ // 共通カードHTML生成関数（新レイアウト対応版）
     function createCardHTML(card, options = {}) {
       const attrObj = ATTR_INFO[card.attr] || ATTR_INFO.none;
       const currentAtk = options.currentAtk !== undefined ? options.currentAtk : card.atk;
       const currentHp = options.currentHp !== undefined ? options.currentHp : card.hp;
-      const statsText = card.type === 'unit'
-        ? `⚔️${currentAtk} ❤️${currentHp}`
-        : (card.type === 'dungeon' ? '🏰ダンジョン' : '📜魔法/装備');
-      const footerRight = options.footerRight !== undefined ? options.footerRight : `${card.basePrice}G`;
+
+      // 整理番号を3桁（001〜020）に整形し、レアリティと結合（例：N-001）
+      const serialCode = `${card.rarity}-${String(card.id).padStart(3, '0')}`;
+      const footerRight = options.footerRight !== undefined ? options.footerRight : serialCode;
+
+      // ユニットは数字のみ、ダンジョン・魔法は種類を表示
+      const atkDisplay = card.type === 'unit' ? `${currentAtk}` : (card.type === 'dungeon' ? '🏰場' : '📜魔');
+      const hpDisplay  = card.type === 'unit' ? `${currentHp}`  : '-';
 
       return `
         <div class="card ${attrObj.cls} rarity-${card.rarity} ${options.selected ? 'selected' : ''} ${options.exhausted ? 'exhausted' : ''}" data-id="${card.id}" style="${options.extraStyle || ''}">
           <div class="card-header">
-            <span>[${card.rarity}]</span>
-            <span>${attrObj.icon}</span>
+            <div class="card-name">${card.name}</div>
           </div>
           <div class="card-art">
             <img src="${card.img}" alt="${card.name}" onerror="this.style.display='none'; this.parentNode.innerHTML='🃏';">
           </div>
-          <div class="card-name">${card.name}</div>
           <div class="card-desc">${card.desc}</div>
           <div class="card-footer">
-            <span>${statsText}</span>
-            <span>${footerRight}</span>
+            <span class="stat-atk">${atkDisplay}</span>
+            <span class="stat-hp">${hpDisplay}</span>
+            <span class="stat-right">${footerRight}</span>
           </div>
         </div>
       `;
@@ -1266,14 +1286,13 @@
     let pressTimer = null;
     let isLongPress = false;
 
-    function showCardZoom(id) {
+function showCardZoom(id) {
       const card = CARD_MASTER.find(c => c.id == id);
       if (!card) return;
       const modal = document.getElementById('card-zoom-modal');
       const render = document.getElementById('zoom-card-render');
-      render.innerHTML = createCardHTML(card, { footerRight: `${card.basePrice}G` });
+      render.innerHTML = createCardHTML(card); // 金額指定を消して「N-001」表記にする！
       modal.classList.add('active');
-      replaceAttrEmojis();
     }
 
     function closeCardZoom() {
@@ -1307,42 +1326,9 @@
       }
     }, true);
 
-      // 属性絵文字を専用オーブ画像（icons/icon_xxx.jpg）に自動変換
-    const ATTR_ICONS = {
-      '🔥': 'icons/icon_fire.jpg',
-      '🌿': 'icons/icon_grass.jpg',
-      '⚡': 'icons/icon_thunder.jpg',
-      '💧': 'icons/icon_water.jpg',
-      '☀️': 'icons/icon_light.jpg',
-      '🌙': 'icons/icon_dark.jpg',
-      '✨': 'icons/icon_none.jpg'
-    };
-
-    let isReplacingAttr = false;
-
-    function replaceAttrEmojis() {
-      if (isReplacingAttr || !document.body) return;
-      isReplacingAttr = true;
-      try {
-        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
-        const nodes = [];
-        let n;
-        while ((n = walker.nextNode())) {
-          if (n.parentNode && n.parentNode.tagName !== 'SCRIPT' && n.parentNode.tagName !== 'STYLE') {
-            if (/(🔥|🌿|⚡|💧|☀️|🌙|✨)/.test(n.nodeValue)) nodes.push(n);
-          }
-        }
-        nodes.forEach(node => {
-          const span = document.createElement('span');
-          span.innerHTML = node.nodeValue.replace(/(🔥|🌿|⚡|💧|☀️|🌙|✨)/g, (m) => {
-            return `<img src="${ATTR_ICONS[m]}" style="width:14px;height:14px;border-radius:50%;vertical-align:middle;margin-right:2px;" onerror="this.outerHTML='${m}'">`;
-          });
-          if (node.parentNode) node.parentNode.replaceChild(span, node);
-        });
-      } finally {
-        isReplacingAttr = false;
-      }
-    }
+   // アイコン画像変換は廃止（互換用ダミー関数）
+    function replaceAttrEmojis() {}
+    
   </script>
 </body>
 </html>
