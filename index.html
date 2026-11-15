@@ -40,7 +40,22 @@
     .card-name { font-weight: bold; font-size: 10px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff; }
     .card-desc { font-size: 8.5px; color: #ddd; background: rgba(0,0,0,0.35); padding: 3px; border-radius: 4px; line-height: 1.25; height: 32px; overflow: hidden; }
     .card-footer { display: flex; justify-content: space-between; align-items: center; font-size: 9.5px; font-weight: bold; color: #ffd700; }
-
+    
+ /* 属性フレーム画像（frames/ フォルダから読み込み） */
+    .attr-fire, .attr-grass, .attr-thunder, .attr-water, .attr-light, .attr-dark, .attr-none {
+      background-size: 100% 100%;
+      background-position: center;
+      background-repeat: no-repeat;
+      border: none !important;
+    }
+    .attr-fire    { background-image: url('frames/fire-frame.png'); }
+    .attr-grass   { background-image: url('frames/grass-frame.png'); }
+    .attr-thunder { background-image: url('frames/thunder-frame.png'); }
+    .attr-water   { background-image: url('frames/water-frame.png'); }
+    .attr-light   { background-image: url('frames/light-frame.png'); }
+    .attr-dark    { background-image: url('frames/dark-frame.png'); }
+    .attr-none    { background-image: url('frames/none-frame.png'); }    
+    
     /* 属性背景グラデーション */
     .attr-fire { background: linear-gradient(160deg, #5c1919, #240a0a); }
     .attr-grass { background: linear-gradient(160deg, #174d2c, #092012); }
